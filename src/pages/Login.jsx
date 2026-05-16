@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Lock, User, ArrowRight, Github } from 'lucide-react';
+import { Layout, Lock, User, ArrowRight, Globe } from 'lucide-react';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -85,7 +85,7 @@ const Login = () => {
 
                         <div className="grid grid-cols-1 gap-4">
                             <button className="flex items-center justify-center gap-3 w-full py-3 bg-slate-900 border border-slate-800 rounded-2xl text-white text-sm font-bold hover:bg-slate-800 transition">
-                                <Github size={20} /> GitHub Account
+                                <Globe size={20} /> Social Account
                             </button>
                         </div>
                     </div>
