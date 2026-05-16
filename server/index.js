@@ -12,6 +12,7 @@ require('./config/passport')(passport);
 const authRoutes = require('./routes/auth');
 const teamRoutes = require('./routes/teams');
 const taskRoutes = require('./routes/tasks');
+const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,27 +27,12 @@ app.use(cors({
     credentials: true
 }));
 
-// log database info to verify connection and tables
-pool.query('SELECT current_database()', (err, res) => {
-    if (!err) {
-        console.log(`Connected to database: ${res.rows[0].current_database}`);
-        
-        // Let's see what tables actually exist
-        pool.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'", (err, res) => {
-            if (!err) {
-                const tables = res.rows.map(r => r.table_name);
-                console.log('Available tables in DB:', tables.join(', '));
-            }
-        });
-    }
-});
-
 // session stored in postgres
 app.use(session({
     store: new pgSession({
         pool: pool,
         tableName: 'session',
-        schemaName: 'public' // explicitly set the schema
+        schemaName: 'public'
     }),
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -65,11 +51,12 @@ app.use(passport.session());
 app.use('/api/auth', authRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.get('/', (req, res) => {
     res.json({ message: 'Team Task Manager API running' });
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
