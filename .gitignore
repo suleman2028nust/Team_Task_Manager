@@ -1,52 +1,32 @@
 # Dependencies
 node_modules/
-<<<<<<< HEAD
-/dist
-/dist-ssr
-.pnpm-store/
 
-# Environment Variables & Secrets (CRUCIAL)
-=======
-.pnp
-.pnp.js
-
-# Testing
-coverage/
-
-# Production
-build/
+# Production builds
 dist/
+dist-ssr/
+build/
 
-# Misc
-.DS_Store
->>>>>>> 9a41645 (initial commit: project structure and basic server setup)
+# Environment variables - never commit these
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-<<<<<<< HEAD
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 
-# System & Editor Files
-.vscode/
-.idea/
+# System & Editor
 .DS_Store
 Thumbs.db
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.swp
-=======
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
->>>>>>> 9a41645 (initial commit: project structure and basic server setup)
+.vscode/
+.idea/
+
+# Misc
+.pnp
+.pnp.js
+coverage/
