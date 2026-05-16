@@ -1,133 +1,148 @@
 import React, { useState } from 'react';
-import { Layout, Users, CheckSquare, Plus, Filter, Search, LogOut } from 'lucide-react';
+import { Layout, Users, CheckSquare, Plus, Filter, Search, LogOut, Bell, ChevronRight } from 'lucide-react';
 
 const Dashboard = () => {
-    // dummy data for UI demonstration
     const [teams] = useState([
-        { id: 1, name: 'Marketing Team' },
-        { id: 2, name: 'Development Team' },
-        { id: 3, name: 'Design Team' }
+        { id: 1, name: 'Marketing Strategy', color: 'bg-blue-500' },
+        { id: 2, name: 'Core Product Dev', color: 'bg-purple-500' },
+        { id: 3, name: 'Brand Identity', color: 'bg-emerald-500' }
     ]);
 
     const [tasks] = useState([
-        { id: 1, title: 'Fix Header Bug', team: 'Development', status: 'In Progress', assignee: 'John' },
-        { id: 2, title: 'Social Media Post', team: 'Marketing', status: 'Pending', assignee: 'Sarah' },
-        { id: 3, title: 'New Logo Design', team: 'Design', status: 'Completed', assignee: 'Mike' },
-        { id: 4, title: 'API Integration', team: 'Development', status: 'Pending', assignee: 'John' }
+        { id: 1, title: 'Finalize Landing Page Design', team: 'Brand Identity', status: 'In Progress', priority: 'High', due: 'Today' },
+        { id: 2, title: 'API Authentication Layer', team: 'Core Product Dev', status: 'Pending', priority: 'Medium', due: 'Tomorrow' },
+        { id: 3, title: 'Q3 Budget Review', team: 'Marketing Strategy', status: 'Completed', priority: 'Low', due: 'Done' },
+        { id: 4, title: 'Bug: Checkout Redirection', team: 'Core Product Dev', status: 'In Progress', priority: 'Urgent', due: '2h' }
     ]);
 
     return (
-        <div className="flex h-screen bg-gray-50 font-sans">
-            {/* insert Sidebar */}
-            <div className="w-64 bg-indigo-700 text-white flex flex-col">
-                <div className="p-6">
-                    <h1 className="text-2xl font-bold flex items-center gap-2">
-                        <Layout size={24} /> TaskFlow
-                    </h1>
+        <div className="flex h-screen bg-black text-slate-200 font-sans">
+            {/* Sidebar - Deep Navy */}
+            <aside className="w-64 bg-slate-950 border-r border-slate-800 flex flex-col">
+                <div className="p-8">
+                    <div className="flex items-center gap-3 text-white">
+                        <div className="bg-indigo-600 p-2 rounded-lg">
+                            <Layout size={24} />
+                        </div>
+                        <h1 className="text-xl font-bold tracking-tight">TaskFlow <span className="text-indigo-500">PRO</span></h1>
+                    </div>
                 </div>
                 
-                <nav className="flex-1 px-4 py-4">
-                    <div className="mb-8">
-                        <p className="text-xs uppercase text-indigo-300 font-semibold mb-4 px-2">Main Menu</p>
-                        <button className="flex items-center gap-3 w-full p-2 bg-indigo-800 rounded-lg mb-2">
-                            <CheckSquare size={20} /> Tasks
-                        </button>
-                        <button className="flex items-center gap-3 w-full p-2 hover:bg-indigo-600 rounded-lg transition mb-2">
-                            <Users size={20} /> Teams
-                        </button>
-                    </div>
-
-                    <div>
-                        <p className="text-xs uppercase text-indigo-300 font-semibold mb-4 px-2">Your Teams</p>
+                <nav className="flex-1 px-4 space-y-1">
+                    <p className="text-[10px] uppercase text-slate-500 font-bold tracking-widest px-4 mb-4">Overview</p>
+                    <button className="flex items-center justify-between w-full p-3 bg-indigo-600/10 text-indigo-400 border-r-2 border-indigo-500 rounded-lg group">
+                        <div className="flex items-center gap-3 font-medium">
+                            <CheckSquare size={18} /> Tasks
+                        </div>
+                        <span className="bg-indigo-500/20 text-indigo-400 text-[10px] px-1.5 py-0.5 rounded-md">12</span>
+                    </button>
+                    <button className="flex items-center gap-3 w-full p-3 text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition group">
+                        <Users size={18} className="group-hover:text-indigo-400" /> Teams
+                    </button>
+                    
+                    <div className="pt-8">
+                        <p className="text-[10px] uppercase text-slate-500 font-bold tracking-widest px-4 mb-4">My Teams</p>
                         {teams.map(team => (
-                            <button key={team.id} className="block w-full text-left p-2 hover:bg-indigo-600 rounded-lg text-sm mb-1">
-                                # {team.name}
+                            <button key={team.id} className="flex items-center gap-3 w-full p-3 text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition text-sm">
+                                <div className={`h-2 w-2 rounded-full ${team.color}`}></div>
+                                {team.name}
                             </button>
                         ))}
                     </div>
                 </nav>
 
-                <div className="p-4 border-t border-indigo-600">
-                    <button className="flex items-center gap-2 text-indigo-200 hover:text-white transition">
-                        <LogOut size={18} /> Logout
+                <div className="p-6 border-t border-slate-800">
+                    <div className="flex items-center gap-3 p-2 bg-slate-900/50 rounded-xl mb-4">
+                        <div className="h-8 w-8 rounded-lg bg-indigo-500 flex items-center justify-center text-white font-bold text-xs">U</div>
+                        <div className="flex-1 overflow-hidden">
+                            <p className="text-xs font-bold text-white truncate">User Name</p>
+                            <p className="text-[10px] text-slate-500 truncate">Pro Account</p>
+                        </div>
+                    </div>
+                    <button className="flex items-center gap-2 text-slate-500 hover:text-red-400 transition text-sm px-2">
+                        <LogOut size={16} /> Logout
                     </button>
                 </div>
-            </div>
+            </aside>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Top Header */}
-                <header className="bg-white border-b h-16 flex items-center justify-between px-8">
-                    <div className="relative w-64">
-                        <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                            <Search size={18} />
-                        </span>
+            <main className="flex-1 flex flex-col bg-black overflow-hidden">
+                {/* Header */}
+                <header className="h-20 border-b border-slate-800 flex items-center justify-between px-10 bg-slate-950/50 backdrop-blur-md sticky top-0 z-10">
+                    <div className="relative w-80">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                         <input 
                             type="text" 
-                            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
-                            placeholder="Search tasks..."
+                            placeholder="Find anything..." 
+                            className="w-full bg-slate-900/50 border border-slate-700 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition"
                         />
                     </div>
                     
-                    <div className="flex items-center gap-4">
-                        <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-700 transition shadow-sm">
-                            <Plus size={18} /> Create Task
+                    <div className="flex items-center gap-6">
+                        <button className="text-slate-400 hover:text-white transition relative">
+                            <Bell size={20} />
+                            <span className="absolute -top-1 -right-1 h-2 w-2 bg-indigo-500 rounded-full"></span>
                         </button>
-                        <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
-                            U
-                        </div>
+                        <button className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-lg shadow-indigo-500/20 flex items-center gap-2">
+                            <Plus size={18} /> New Task
+                        </button>
                     </div>
                 </header>
 
-                {/* Dashboard Content */}
-                <main className="flex-1 overflow-y-auto p-8">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-gray-800">All Tasks</h2>
-                        <div className="flex items-center gap-2 text-sm text-gray-500 bg-white border px-3 py-1 rounded-md cursor-pointer hover:bg-gray-50">
-                            <Filter size={16} /> Filter
+                {/* Body */}
+                <div className="p-10 overflow-y-auto">
+                    <div className="flex justify-between items-end mb-8">
+                        <div>
+                            <h2 className="text-3xl font-bold text-white mb-1 text-slate-100">Task Overview</h2>
+                            <p className="text-slate-500 text-sm">You have 4 tasks in progress today.</p>
                         </div>
+                        <button className="flex items-center gap-2 bg-slate-900 border border-slate-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition">
+                            <Filter size={14} /> Filter View
+                        </button>
                     </div>
 
-                    {/* Task Table */}
-                    <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-                        <table className="w-full text-left">
-                            <thead className="bg-gray-50 border-b">
-                                <tr>
-                                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Task</th>
-                                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Team</th>
-                                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Assignee</th>
-                                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200">
-                                {tasks.map(task => (
-                                    <tr key={task.id} className="hover:bg-gray-50 transition">
-                                        <td className="px-6 py-4 font-medium text-gray-900">{task.title}</td>
-                                        <td className="px-6 py-4 text-gray-500">{task.team}</td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-[10px]">
-                                                    {task.assignee[0]}
-                                                </div>
-                                                <span className="text-sm text-gray-600">{task.assignee}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                                task.status === 'Completed' ? 'bg-green-100 text-green-700' : 
-                                                task.status === 'In Progress' ? 'bg-blue-100 text-blue-700' : 
-                                                'bg-yellow-100 text-yellow-700'
-                                            }`}>
-                                                {task.status}
+                    {/* Task Grid/List */}
+                    <div className="grid gap-4">
+                        {tasks.map(task => (
+                            <div key={task.id} className="group bg-slate-950 border border-slate-800 p-5 rounded-2xl hover:border-indigo-500/50 hover:bg-slate-900/50 transition duration-300 flex items-center justify-between shadow-sm">
+                                <div className="flex items-center gap-6">
+                                    <div className={`h-10 w-1 dark:rounded-full ${
+                                        task.priority === 'Urgent' ? 'bg-red-500' : 
+                                        task.priority === 'High' ? 'bg-orange-500' : 
+                                        task.priority === 'Medium' ? 'bg-blue-500' : 'bg-slate-700'
+                                    }`}></div>
+                                    <div>
+                                        <h3 className="font-bold text-white group-hover:text-indigo-400 transition">{task.title}</h3>
+                                        <div className="flex items-center gap-3 mt-1">
+                                            <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
+                                                <Users size={12} /> {task.team}
                                             </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                            <span className="text-slate-700">•</span>
+                                            <span className="text-[11px] text-slate-500 font-medium italic">Due: {task.due}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-8">
+                                    <div className="text-right">
+                                        <p className="text-[10px] text-slate-600 font-bold uppercase mb-1">Status</p>
+                                        <span className={`text-[10px] font-bold px-2 py-1 rounded-md ${
+                                            task.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400' : 
+                                            task.status === 'In Progress' ? 'bg-blue-500/10 text-blue-400' : 
+                                            'bg-slate-800 text-slate-400'
+                                        }`}>
+                                            {task.status.toUpperCase()}
+                                        </span>
+                                    </div>
+                                    <button className="h-10 w-10 bg-slate-900 rounded-xl flex items-center justify-center text-slate-500 group-hover:bg-indigo-600 group-hover:text-white transition">
+                                        <ChevronRight size={20} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                </main>
-            </div>
+                </div>
+            </main>
         </div>
     );
 };
