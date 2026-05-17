@@ -17,22 +17,6 @@ const PRIORITY = {
     urgent: '#ef4444', high: '#f97316', medium: '#f59e0b', low: '#6b7280'
 };
 
-/* ── tiny style helpers ── */
-const S = {
-    page:    { position:'fixed', inset:0, display:'flex', background:'#020209', fontFamily:"'Inter',system-ui,sans-serif", color:'#cbd5e1' },
-    sidebar: { width:256, minWidth:256, background:'#07070f', borderRight:'1px solid #1e1e2e', display:'flex', flexDirection:'column', overflow:'hidden' },
-    main:    { flex:1, display:'flex', flexDirection:'column', overflow:'hidden', minWidth:0 },
-    header:  { height:64, flexShrink:0, background:'#07070f', borderBottom:'1px solid #1e1e2e', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 28px', gap:14 },
-    body:    { flex:1, overflowY:'auto', padding:28 },
-    card:    { background:'#07070f', border:'1px solid #1e1e2e', borderRadius:14, overflow:'hidden' },
-    input:   { width:'100%', background:'#0f0f1a', border:'1px solid #334155', borderRadius:9, padding:'9px 12px', fontSize:13, color:'#f8fafc', outline:'none', fontFamily:'inherit', boxSizing:'border-box' },
-    label:   { display:'block', fontSize:11, fontWeight:700, color:'#94a3b8', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.07em' },
-    btn:     { display:'flex', alignItems:'center', gap:7, padding:'9px 18px', background:'#4f46e5', border:'none', borderRadius:9, color:'white', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:'inherit' },
-    btnGhost:{ display:'flex', alignItems:'center', gap:7, padding:'8px 16px', background:'#0f0f1a', border:'1px solid #334155', borderRadius:9, color:'#e2e8f0', fontWeight:600, fontSize:13, cursor:'pointer', fontFamily:'inherit' },
-    overlay: { position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:50, padding:20 },
-    modal:   { background:'#0d0d18', border:'1px solid #334155', borderRadius:18, padding:28, width:'100%', maxWidth:480, maxHeight:'90vh', overflowY:'auto' },
-};
-
 export default function Dashboard() {
     const [user,       setUser]       = useState(null);
     const [tasks,      setTasks]      = useState([]);
@@ -323,10 +307,10 @@ export default function Dashboard() {
     const teamColors = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444'];
 
     if (loading) return (
-        <div style={{...S.page, alignItems:'center', justifyContent:'center'}}>
-            <div style={{textAlign:'center'}}>
-                <div style={{width:38,height:38,border:'2px solid #4f46e5',borderTopColor:'transparent',borderRadius:'50%',animation:'spin 0.8s linear infinite',margin:'0 auto 10px'}}/>
-                <p style={{color:'#64748b',fontSize:13}}>Loading workspace…</p>
+        <div className="fixed inset-0 flex items-center justify-center bg-[#020209] font-sans text-[#cbd5e1]">
+            <div className="text-center">
+                <div className="w-[38px] h-[38px] border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-2.5"/>
+                <p className="text-[#64748b] text-[13px]">Loading workspace…</p>
             </div>
         </div>
     );
@@ -334,17 +318,6 @@ export default function Dashboard() {
     return (
         <>
         <style>{`
-            @keyframes spin{to{transform:rotate(360deg)}}
-            @media (max-width: 768px) {
-                .stats-grid { grid-template-columns: 1fr 1fr !important; }
-                .sidebar-el { 
-                    position: fixed !important; 
-                    z-index: 100 !important; 
-                    height: 100% !important;
-                    transition: transform 0.3s ease !important;
-                }
-                .main-el { margin-left: 0 !important; }
-            }
             select option { background: #0f0f1a; color: #f8fafc; }
             input[type="date"] {
                 color-scheme: dark;
@@ -358,54 +331,55 @@ export default function Dashboard() {
                 opacity: 1;
             }
         `}</style>
-        <div style={S.page}>
+        <div className="fixed inset-0 flex bg-[#020209] font-sans text-[#cbd5e1] overflow-hidden">
 
             {/* ── SIDEBAR ── */}
-            <aside className="sidebar-el" style={{
-                ...S.sidebar,
+            <aside className="sidebar-el w-64 min-w-[256px] bg-[#07070f] border-r border-[#1e1e2e] flex flex-col overflow-hidden transition-transform duration-300 md:relative md:translate-x-0" style={{
                 transform: showSidebar ? 'translateX(0)' : 'translateX(-100%)',
-                position: window.innerWidth <= 768 ? 'fixed' : 'relative'
+                position: window.innerWidth <= 768 ? 'fixed' : 'relative',
+                zIndex: window.innerWidth <= 768 ? 100 : 'auto',
+                height: window.innerWidth <= 768 ? '100%' : 'auto'
             }}>
                 {/* Logo */}
-                <div style={{padding:'22px 18px', borderBottom:'1px solid #1e1e2e', display:'flex', alignItems:'center', justifyContent:'space-between'}}>
-                    <div style={{display:'flex',alignItems:'center',gap:10}}>
-                        <div style={{width:35,height:35,background:'#4f46e5',borderRadius:10,display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 0 18px rgba(79,70,229,0.4)'}}>
+                <div className="py-[22px] px-[18px] border-b border-[#1e1e2e] flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-[35px] h-[35px] bg-[#4f46e5] rounded-[10px] flex items-center justify-center shadow-[0_0_18px_rgba(79,70,229,0.4)]">
                             <LayoutDashboard size={17} color="white"/>
                         </div>
-                        <span style={{color:'white',fontWeight:800,fontSize:16,letterSpacing:'-0.5px'}}>TaskFlow</span>
+                        <span className="text-white font-extrabold text-base tracking-tight">TaskFlow</span>
                     </div>
                     {window.innerWidth <= 768 && (
-                        <button onClick={() => setShowSidebar(false)} style={{background:'none', border:'none', color:'#475569', cursor:'pointer'}}>
+                        <button onClick={() => setShowSidebar(false)} className="background-none border-0 text-slate-500 cursor-pointer flex hover:text-slate-300 transition-colors">
                             <X size={20}/>
                         </button>
                     )}
                 </div>
 
                 {/* Nav */}
-                <nav style={{flex:1,padding:'14px 10px',overflowY:'auto'}}>
-                    <p style={{fontSize:10,fontWeight:700,color:'#64748b',letterSpacing:'0.1em',textTransform:'uppercase',padding:'0 8px',marginBottom:6}}>Workspace</p>
+                <nav className="flex-1 py-3.5 px-2.5 overflow-y-auto">
+                    <p className="text-[10px] font-bold text-slate-500 tracking-widest uppercase px-2 mb-1.5">Workspace</p>
                     {[
                         { id:'tasks', label:'Tasks', Icon:CheckSquare, badge:stats.total },
                         { id:'teams', label:'Teams', Icon:Users,       badge:stats.teams },
                     ].map(({id,label,Icon,badge}) => {
                         const active = activeNav === id;
                         return (
-                            <button key={id} onClick={()=>setActiveNav(id)} style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'space-between',padding:'9px 10px',borderRadius:9,marginBottom:2,background:active?'rgba(99,102,241,0.12)':'transparent',color:active?'white':'#94a3b8',fontWeight:600,fontSize:13,border:'none',cursor:'pointer'}}>
-                                <div style={{display:'flex',alignItems:'center',gap:9}}>
+                            <button key={id} onClick={()=>setActiveNav(id)} className={`w-full flex items-center justify-between py-2 px-2.5 rounded-lg mb-0.5 transition-colors text-sm font-semibold border-0 cursor-pointer ${active ? 'bg-indigo-600/12 text-white' : 'bg-transparent text-slate-400 hover:text-slate-200'}`} style={{background: active ? 'rgba(99, 102, 241, 0.12)' : 'transparent'}}>
+                                <div className="flex items-center gap-2.5">
                                     <Icon size={15} color={active?'#818cf8':'currentColor'}/>
                                     {label}
                                 </div>
-                                <span style={{fontSize:10,fontWeight:700,padding:'2px 7px',borderRadius:99,background:active?'rgba(99,102,241,0.2)':'#1e1e2e',color:active?'#a5b4fc':'#94a3b8'}}>{badge}</span>
+                                <span className={`text-[10px] font-bold py-0.5 px-2 rounded-full ${active ? 'bg-indigo-600/20 text-[#a5b4fc]' : 'bg-[#1e1e2e] text-slate-400'}`}>{badge}</span>
                             </button>
                         );
                     })}
 
-                    <p style={{fontSize:10,fontWeight:700,color:'#64748b',letterSpacing:'0.1em',textTransform:'uppercase',padding:'0 8px',margin:'18px 0 6px'}}>My Teams</p>
+                    <p className="text-[10px] font-bold text-slate-500 tracking-widest uppercase px-2 mt-4.5 mb-1.5" style={{ marginTop: '18px' }}>My Teams</p>
                     {teams.length === 0
-                        ? <p style={{fontSize:12,color:'#334155',padding:'0 8px'}}>No teams yet</p>
+                        ? <p className="text-xs text-slate-600 px-2">No teams yet</p>
                         : teams.map((t,i) => (
-                            <button key={t.id} onClick={()=>{setActiveNav('teams'); viewTeamTasks(t);}} style={{width:'100%',display:'flex',alignItems:'center',gap:9,padding:'7px 10px',borderRadius:9,color:'#64748b',fontWeight:600,fontSize:12,border:'none',background:'transparent',cursor:'pointer'}}>
-                                <span style={{width:7,height:7,borderRadius:'50%',background:teamColors[i%teamColors.length],flexShrink:0}}/>
+                            <button key={t.id} onClick={()=>{setActiveNav('teams'); viewTeamTasks(t);}} className="w-full flex items-center gap-2.5 py-1.5 px-2.5 rounded-lg text-slate-500 hover:text-slate-300 font-semibold text-[12px] border-0 bg-transparent cursor-pointer">
+                                <span className="w-1.75 h-1.75 rounded-full flex-shrink-0" style={{ width: 7, height: 7, background: teamColors[i%teamColors.length] }}/>
                                 {t.name}
                             </button>
                         ))
@@ -413,15 +387,15 @@ export default function Dashboard() {
                 </nav>
 
                 {/* User */}
-                <div style={{padding:10,borderTop:'1px solid #1e1e2e'}}>
-                    <div style={{display:'flex',alignItems:'center',gap:9,padding:'9px 10px',borderRadius:11,background:'#0f0f1a'}}>
-                        <div style={{width:32,height:32,borderRadius:8,background:'#4f46e5',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:800,fontSize:13,flexShrink:0}}>
+                <div className="p-2.5 border-t border-[#1e1e2e]">
+                    <div className="flex items-center gap-2.5 py-2 px-2.5 rounded-[11px] bg-[#0f0f1a]">
+                        <div className="w-8 h-8 rounded-lg bg-[#4f46e5] flex items-center justify-center text-white font-extrabold text-sm shrink-0">
                             {user?.username?.[0]?.toUpperCase()||'U'}
                         </div>
-                        <div style={{flex:1,minWidth:0}}>
-                            <p style={{color:'white',fontWeight:700,fontSize:13,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{user?.username}</p>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-white font-bold text-sm truncate">{user?.username}</p>
                         </div>
-                        <button onClick={handleLogout} style={{color:'#334155',background:'none',border:'none',cursor:'pointer',display:'flex',padding:3}}>
+                        <button onClick={handleLogout} className="text-slate-600 bg-transparent border-0 cursor-pointer flex p-0.75 hover:text-red-400 transition-colors">
                             <LogOut size={14}/>
                         </button>
                     </div>
@@ -429,30 +403,30 @@ export default function Dashboard() {
             </aside>
 
             {/* ── MAIN ── */}
-            <div style={S.main}>
+            <div className="flex-1 flex flex-col overflow-hidden min-w-0">
                 {/* Header */}
-                <header style={S.header}>
-                    <div style={{display:'flex', alignItems:'center', gap:12}}>
+                <header className="h-16 shrink-0 bg-[#07070f] border-b border-[#1e1e2e] flex items-center justify-between px-7 gap-3.5">
+                    <div className="flex items-center gap-3 flex-1 max-w-[380px]">
                         {window.innerWidth <= 768 && (
-                            <button onClick={() => setShowSidebar(true)} style={{background:'none', border:'none', color:'#64748b', cursor:'pointer', display:'flex'}}>
+                            <button onClick={() => setShowSidebar(true)} className="bg-transparent border-0 text-slate-500 cursor-pointer flex hover:text-slate-300 transition-colors">
                                 <LayoutDashboard size={20}/>
                             </button>
                         )}
-                        <div style={{position:'relative',flex:1,maxWidth:340}}>
-                            <Search style={{position:'absolute',left:11,top:'50%',transform:'translateY(-50%)',color:'#334155'}} size={14}/>
+                        <div className="relative flex-1">
+                            <Search className="absolute left-[11px] top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none" size={14}/>
                             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search tasks…"
-                                style={{...S.input, paddingLeft:34, width:'100%'}}/>
+                                className="w-full h-[38px] bg-[#0f0f1a] border border-slate-700 rounded-lg pl-[34px] pr-3 text-xs text-slate-100 placeholder-slate-600 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"/>
                         </div>
                     </div>
-                    <div style={{display:'flex',alignItems:'center',gap:10}}>
+                    <div className="flex items-center gap-2.5">
                         {/* Team Filter */}
-                        <select value={filterTeam} onChange={e => setFilterTeam(e.target.value)} style={{...S.input, width:130}}>
+                        <select value={filterTeam} onChange={e => setFilterTeam(e.target.value)} className="w-[130px] h-[38px] bg-[#0f0f1a] border border-slate-700 rounded-lg px-3 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all">
                             <option value="all">All Teams</option>
                             {teams.map(t => <option key={t.id} value={t.id}>{t.name} {t.created_by === user?.id ? '(Lead)' : ''}</option>)}
                         </select>
                         
                         {/* Assignee Filter */}
-                        <select value={filterAssignee} onChange={e => setFilterAssignee(e.target.value)} style={{...S.input, width:130}}>
+                        <select value={filterAssignee} onChange={e => setFilterAssignee(e.target.value)} className="w-[130px] h-[38px] bg-[#0f0f1a] border border-slate-700 rounded-lg px-3 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all">
                             <option value="all">All Members</option>
                             <option value="unassigned">Unassigned</option>
                             {user && <option value={user.id}>Me (@{user.username})</option>}
@@ -460,7 +434,7 @@ export default function Dashboard() {
 
                         {/* Only show New Task if user is a leader of AT LEAST one team */}
                         {teams.some(t => t.created_by === user?.id) && (
-                            <button onClick={()=>{setEditingTask(null); setForm({ title:'', description:'', team_id:'', priority:'medium', status:'pending', due_date:'', assigned_to:'' }); setShowModal(true)}} style={{...S.btn, boxShadow:'0 0 18px rgba(79,70,229,0.3)'}}>
+                            <button onClick={()=>{setEditingTask(null); setForm({ title:'', description:'', team_id:'', priority:'medium', status:'pending', due_date:'', assigned_to:'' }); setShowModal(true)}} className="flex items-center gap-1.5 h-[38px] px-4 bg-[#4f46e5] hover:bg-[#4338ca] border-0 rounded-lg text-white font-bold text-xs cursor-pointer shadow-lg shadow-indigo-600/30 transition-all">
                                 <Plus size={15}/> New Task
                             </button>
                         )}
@@ -468,23 +442,23 @@ export default function Dashboard() {
                 </header>
 
                 {/* Body */}
-                <main style={S.body}>
+                <main className="flex-1 overflow-y-auto p-7">
                     {activeNav === 'tasks' && (
                         <>
                             {/* Greeting */}
-                            <div style={{marginBottom:24}}>
-                                <h1 style={{color:'white',fontWeight:900,fontSize:22,letterSpacing:'-0.4px',marginBottom:4}}>
+                            <div className="mb-6">
+                                <h1 className="text-white font-black text-2xl tracking-tight mb-1">
                                     Good to see you, {user?.username} 👋
                                 </h1>
-                                <p style={{color:'#94a3b8',fontSize:13}}>
+                                <p className="text-slate-400 text-[13px]">
                                     {tasks.length === 0 ? "No tasks assigned to you yet." : `${tasks.filter(t=>t.status!=='completed').length} active task(s) assigned to you.`}
                                 </p>
                                 
                                 {/* Reminders */}
                                 {tasks.some(t => t.status !== 'completed' && t.due_date && new Date(t.due_date) <= new Date(Date.now() + 24 * 60 * 60 * 1000)) && (
-                                    <div style={{marginTop:14, padding:12, background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:9, display:'flex', alignItems:'center', gap:10}}>
+                                    <div className="mt-3.5 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2.5">
                                         <AlertCircle size={16} color="#ef4444"/>
-                                        <span style={{fontSize:12, color:'#f87171', fontWeight:600}}>
+                                        <span className="text-[12px] text-red-400 font-semibold">
                                             Attention: You have tasks that are due within 24 hours or overdue!
                                         </span>
                                     </div>
@@ -492,64 +466,63 @@ export default function Dashboard() {
                             </div>
 
                             {/* Stats */}
-                            <div className="stats-grid" style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:14,marginBottom:24}}>
+                            <div className="stats-grid grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-6">
                                 {[
                                     { label:'Total Tasks',  value:stats.total,       accent:'#6366f1', Icon:BarChart3     },
                                     { label:'In Progress',  value:stats.in_progress, accent:'#3b82f6', Icon:TrendingUp    },
                                     { label:'Completed',    value:stats.completed,   accent:'#10b981', Icon:CheckCircle2  },
                                     { label:'Pending',      value:stats.pending,     accent:'#f59e0b', Icon:AlertCircle   },
                                 ].map(s=>(
-                                    <div key={s.label} style={{...S.card, padding:18}}>
-                                        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
-                                            <p style={{fontSize:10,fontWeight:700,color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.08em'}}>{s.label}</p>
-                                            <div style={{width:30,height:30,borderRadius:8,background:`${s.accent}20`,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                                    <div key={s.label} className="bg-[#07070f] border border-[#1e1e2e] rounded-[14px] overflow-hidden p-4.5" style={{ padding: '18px' }}>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{s.label}</p>
+                                            <div className="w-[30px] h-[30px] rounded-lg flex items-center justify-center" style={{ background: `${s.accent}20` }}>
                                                 <s.Icon size={14} color={s.accent}/>
                                             </div>
                                         </div>
-                                        <p style={{color:'white',fontWeight:900,fontSize:30,lineHeight:1}}>{s.value}</p>
+                                        <p className="text-white font-black text-3xl leading-none">{s.value}</p>
                                     </div>
                                 ))}
                             </div>
 
                             {/* Task list */}
-                            <div style={S.card}>
-                                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 22px',borderBottom:'1px solid #1e1e2e'}}>
-                                    <h2 style={{color:'white',fontWeight:700,fontSize:13}}>All Tasks</h2>
-                                    <span style={{color:'#94a3b8',fontSize:12}}>{filtered.length} total</span>
+                            <div className="bg-[#07070f] border border-[#1e1e2e] rounded-[14px] overflow-hidden">
+                                <div className="flex items-center justify-between py-3.5 px-5.5 border-b border-[#1e1e2e]">
+                                    <h2 className="text-white font-bold text-xs uppercase tracking-wider">All Tasks</h2>
+                                    <span className="text-slate-400 text-xs">{filtered.length} total</span>
                                 </div>
                                 {filtered.length === 0 ? (
-                                    <div style={{padding:'60px 20px',textAlign:'center'}}>
-                                        <CheckSquare size={28} color="#94a3b8" style={{margin:'0 auto 12px'}}/>
-                                        <p style={{color:'white',fontWeight:700,marginBottom:4}}>No tasks found</p>
-                                        <p style={{color:'#94a3b8',fontSize:13}}>Click "New Task" to get started.</p>
+                                    <div className="py-15 px-5 text-center" style={{ padding: '60px 20px' }}>
+                                        <CheckSquare size={28} color="#94a3b8" className="mx-auto mb-3"/>
+                                        <p className="text-white font-bold mb-1">No tasks found</p>
+                                        <p className="text-slate-400 text-[13px]">Click "New Task" to get started.</p>
                                     </div>
                                 ) : filtered.map((task, i) => {
                                     const s = STATUS[task.status] || STATUS.pending;
                                     return (
                                         <div key={task.id} 
                                             onClick={() => openEditModal(task)}
-                                            style={{display:'flex',alignItems:'center',gap:14,padding:'13px 22px',borderBottom:i<filtered.length-1?'1px solid #1e1e2e':'none',borderLeft:`3px solid ${s.color}`,cursor:'pointer',transition:'background 0.1s'}}
-                                            onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.02)'}
-                                            onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                                            className="flex items-center gap-3.5 py-3 px-5.5 border-b last:border-b-0 border-[#1e1e2e] border-l-[3px] cursor-pointer hover:bg-white/[0.02] transition-all"
+                                            style={{ borderLeftColor: s.color }}>
                                             {/* status icon — click to cycle */}
-                                            <button onClick={()=>cycleStatus(task)} title="Click to change status"
-                                                style={{background:'none',border:'none',cursor:'pointer',padding:0,display:'flex',flexShrink:0,color:s.color}}>
+                                            <button onClick={(e)=>{e.stopPropagation(); cycleStatus(task);}} title="Click to change status"
+                                                className="bg-transparent border-0 cursor-pointer p-0 flex shrink-0" style={{ color: s.color }}>
                                                 <s.Icon size={17} color={s.color}/>
                                             </button>
-                                            <div style={{flex:1,minWidth:0}}>
-                                                <p style={{color:'#e2e8f0',fontWeight:600,fontSize:13,marginBottom:2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{task.title}</p>
-                                                <div style={{display:'flex',alignItems:'center',gap:8,fontSize:11,color:'#94a3b8'}}>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-slate-200 font-semibold text-xs mb-0.5 truncate">{task.title}</p>
+                                                <div className="flex items-center gap-2 text-[11px] text-slate-400">
                                                     <span>{task.team_name||'General'}</span>
                                                     {task.due_date && <><span>·</span><span>Due {new Date(task.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></>}
                                                     {task.assignee_name && task.assignee_name !== 'Unassigned' && <><span>·</span><span>@{task.assignee_name}</span></>}
                                                 </div>
                                             </div>
-                                            <div style={{display:'flex',alignItems:'center',gap:10,flexShrink:0}}>
+                                            <div className="flex items-center gap-2.5 shrink-0">
                                                 {task.priority && (
-                                                    <span style={{width:6,height:6,borderRadius:'50%',background:PRIORITY[task.priority]||'#6b7280'}} title={task.priority}/>
+                                                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: PRIORITY[task.priority]||'#6b7280' }} title={task.priority}/>
                                                 )}
-                                                <span style={{fontSize:11,fontWeight:700,padding:'4px 9px',borderRadius:7,background:`${s.color}18`,color:s.color}}>{s.label}</span>
-                                                <ChevronRight size={13} color="#334155"/>
+                                                <span className="text-[11px] font-bold px-2 py-0.5 rounded transition-all" style={{ backgroundColor: `${s.color}18`, color: s.color }}>{s.label}</span>
+                                                <ChevronRight size={13} className="text-slate-700"/>
                                             </div>
                                         </div>
                                     );
@@ -560,67 +533,65 @@ export default function Dashboard() {
 
                     {activeNav === 'teams' && !selectedTeamView && (
                         <>
-                            <div style={{marginBottom:24, display:'flex', alignItems:'center', justifyContent:'space-between'}}>
+                            <div className="mb-6 flex items-center justify-between">
                                 <div>
-                                    <h1 style={{color:'white',fontWeight:900,fontSize:22,letterSpacing:'-0.4px',marginBottom:4}}>My Teams</h1>
-                                    <p style={{color:'#94a3b8',fontSize:13}}>Teams you're a member of.</p>
+                                    <h1 className="text-white font-black text-2xl tracking-tight mb-1">My Teams</h1>
+                                    <p className="text-slate-400 text-[13px]">Teams you're a member of.</p>
                                 </div>
-                                <button onClick={() => setShowTeamModal(true)} style={S.btn}>
+                                <button onClick={() => setShowTeamModal(true)} className="flex items-center gap-1.5 h-[38px] px-4 bg-[#4f46e5] hover:bg-[#4338ca] border-0 rounded-lg text-white font-bold text-xs cursor-pointer shadow-lg shadow-indigo-600/30 transition-all">
                                     <Plus size={15}/> New Team
                                 </button>
                             </div>
                             {teams.length === 0 ? (
-                                <div style={{...S.card, padding:60, textAlign:'center'}}>
-                                    <Users size={28} color="#94a3b8" style={{margin:'0 auto 12px'}}/>
-                                    <p style={{color:'white',fontWeight:700,marginBottom:4}}>No teams yet</p>
-                                    <p style={{color:'#94a3b8',fontSize:13}}>Ask someone to add you to a team.</p>
+                                <div className="bg-[#07070f] border border-[#1e1e2e] rounded-[14px] overflow-hidden p-15 text-center" style={{ padding: '60px 20px' }}>
+                                    <Users size={28} color="#94a3b8" className="mx-auto mb-3"/>
+                                    <p className="text-white font-bold mb-1">No teams yet</p>
+                                    <p className="text-slate-400 text-[13px]">Ask someone to add you to a team.</p>
                                 </div>
                             ) : (
-                                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:14}}>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
                                     {teams.map((t,i)=>{
                                         const isLeader = t.created_by === user?.id;
                                         return (
-                                        <div key={t.id} style={{...S.card, padding:20, position:'relative'}}>
+                                        <div key={t.id} className="bg-[#07070f] border border-[#1e1e2e] rounded-[14px] overflow-hidden p-5 relative">
                                             {isLeader && (
-                                                <span style={{position:'absolute', top:12, right:12, fontSize:9, fontWeight:800, background:'rgba(79,70,229,0.2)', color:'#818cf8', padding:'2px 6px', borderRadius:5, textTransform:'uppercase'}}>Leader</span>
+                                                <span className="absolute top-3 right-3 text-[9px] font-extrabold bg-indigo-500/20 text-[#818cf8] py-0.5 px-1.5 rounded uppercase">Leader</span>
                                             )}
-                                            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
-                                                <div style={{width:38,height:38,borderRadius:10,background:`${teamColors[i%teamColors.length]}22`,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                                            <div className="flex items-center gap-2.5 mb-3">
+                                                <div className="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center" style={{ background: `${teamColors[i%teamColors.length]}22` }}>
                                                     <Users size={16} color={teamColors[i%teamColors.length]}/>
                                                 </div>
-                                                <div style={{flex:1}}>
-                                                    <p style={{color:'white',fontWeight:700,fontSize:14}}>{t.name}</p>
-                                                    <p style={{color:'#475569',fontSize:11}}>Team</p>
+                                                <div className="flex-1">
+                                                    <p className="text-white font-bold text-sm">{t.name}</p>
+                                                    <p className="text-slate-500 text-[11px]">Team</p>
                                                 </div>
                                             </div>
-                                            {t.description && <p style={{color:'#64748b',fontSize:12,lineHeight:1.5, marginBottom:16}}>{t.description}</p>}
+                                            {t.description && <p className="text-slate-400 text-xs leading-relaxed mb-4">{t.description}</p>}
                                             
                                             {/* View Tasks button for all members */}
-                                            <button onClick={() => viewTeamTasks(t)} style={{...S.btnGhost, width:'100%', padding:'7px', fontSize:11, marginBottom:8, color:'#e2e8f0'}}>
+                                            <button onClick={() => viewTeamTasks(t)} className="flex items-center gap-1.5 h-9 w-full justify-center bg-[#0f0f1a] hover:bg-slate-900 border border-slate-700 rounded-lg text-[#e2e8f0] font-semibold text-[11px] mb-2 cursor-pointer transition-colors">
                                                 <CheckSquare size={12}/> View Team Tasks
                                             </button>
 
-                                            <div style={{display:'flex', gap:8}}>
+                                            <div className="flex gap-2">
                                                 {isLeader ? (
                                                     <>
-                                                        <button onClick={() => openAddMemberModal(t)} style={{...S.btnGhost, flex:1, padding:'6px', fontSize:11}}>
+                                                        <button onClick={() => openAddMemberModal(t)} className="flex items-center gap-1 h-9 justify-center bg-[#0f0f1a] hover:bg-slate-900 border border-slate-700 rounded-lg text-[#e2e8f0] font-semibold text-[11px] cursor-pointer transition-colors flex-1" style={{ padding: '6px' }}>
                                                             <Plus size={12}/> Add Member
                                                         </button>
-                                                        <button onClick={() => openManageModal(t)} style={{...S.btnGhost, flex:1, padding:'6px', fontSize:11, color:'#818cf8', borderColor:'#312e81'}}>
+                                                        <button onClick={() => openManageModal(t)} className="flex items-center gap-1 h-9 justify-center bg-[#0f0f1a] hover:bg-slate-900 border border-indigo-900/50 rounded-lg text-[#818cf8] font-semibold text-[11px] cursor-pointer transition-colors flex-1" style={{ padding: '6px' }}>
                                                             Manage
                                                         </button>
                                                     </>
                                                 ) : (
-                                                    <button onClick={() => openManageModal(t)} style={{...S.btnGhost, width:'100%', padding:'6px', fontSize:11}}>
+                                                    <button onClick={() => openManageModal(t)} className="flex items-center gap-1 h-9 w-full justify-center bg-[#0f0f1a] hover:bg-slate-900 border border-slate-700 rounded-lg text-[#e2e8f0] font-semibold text-[11px] cursor-pointer transition-colors" style={{ padding: '6px' }}>
                                                         <Users size={12}/> View Members
                                                     </button>
                                                 )}
                                             </div>
                                             {isLeader && (
                                                 <button onClick={() => handleDeleteTeam(t.id)} 
-                                                    style={{width:'100%', marginTop:10, background:'none', border:'none', color:'#ef4444', fontSize:11, fontWeight:700, cursor:'pointer', textAlign:'center', transition:'opacity 0.2s'}}
-                                                    onMouseEnter={e=>e.currentTarget.style.opacity='0.8'}
-                                                    onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+                                                    className="w-full mt-2.5 bg-transparent border-0 text-red-500 text-[11px] font-bold cursor-pointer text-center hover:opacity-80 transition-all">
                                                     Delete Team
                                                 </button>
                                             )}
@@ -634,36 +605,36 @@ export default function Dashboard() {
                     {/* ── TEAM TASK VIEW ── */}
                     {activeNav === 'teams' && selectedTeamView && (
                         <>
-                            <div style={{marginBottom:24, display:'flex', alignItems:'center', gap:14}}>
-                                <button onClick={() => setSelectedTeamView(null)} style={{...S.btnGhost, padding:'7px 12px', fontSize:12}}>
+                            <div className="mb-6 flex items-center gap-3.5">
+                                <button onClick={() => setSelectedTeamView(null)} className="flex items-center gap-1.5 h-9 px-3.5 bg-[#0f0f1a] hover:bg-slate-900 border border-slate-700 rounded-lg text-slate-200 font-semibold text-xs cursor-pointer transition-colors" style={{ padding: '7px 12px' }}>
                                     ← Back to Teams
                                 </button>
                                 <div>
-                                    <h1 style={{color:'white',fontWeight:900,fontSize:22,letterSpacing:'-0.4px',marginBottom:2}}>
+                                    <h1 className="text-white font-black text-2xl tracking-tight mb-0.5">
                                         {selectedTeamView.name} — All Tasks
                                     </h1>
-                                    <p style={{color:'#94a3b8',fontSize:13}}>{teamTasks.length} task(s) in this team</p>
+                                    <p className="text-slate-400 text-[13px]">{teamTasks.length} task(s) in this team</p>
                                 </div>
                             </div>
-                            <div style={S.card}>
+                            <div className="bg-[#07070f] border border-[#1e1e2e] rounded-[14px] overflow-hidden">
                                 {loadingTeamTasks ? (
-                                    <div style={{padding:'20px 22px', display:'flex', flexDirection:'column', gap:16}}>
+                                    <div className="p-5 px-5.5 flex flex-col gap-4" style={{ padding: '20px 22px' }}>
                                         {[1, 2, 3].map(n => (
-                                            <div key={n} style={{display:'flex', alignItems:'center', gap:14, padding:'13px 0', borderBottom:n<3?'1px solid #1e1e2e':'none'}}>
-                                                <div style={{width:17, height:17, borderRadius:'50%', background:'#16162a', animation:'pulse 1.5s infinite ease-in-out'}}/>
-                                                <div style={{flex:1}}>
-                                                    <div style={{width:'35%', height:12, borderRadius:4, background:'#16162a', marginBottom:8, animation:'pulse 1.5s infinite ease-in-out'}}/>
-                                                    <div style={{width:'18%', height:8, borderRadius:4, background:'#16162a', animation:'pulse 1.5s infinite ease-in-out'}}/>
+                                            <div key={n} className="flex items-center gap-3.5 py-3 border-b last:border-b-0 border-[#1e1e2e]">
+                                                <div className="w-[17px] h-[17px] rounded-full bg-[#16162a] animate-pulse"/>
+                                                <div className="flex-1">
+                                                    <div className="w-[35%] h-3 rounded bg-[#16162a] mb-2 animate-pulse"/>
+                                                    <div className="w-[18%] h-2 rounded bg-[#16162a] animate-pulse"/>
                                                 </div>
-                                                <div style={{width:68, height:20, borderRadius:8, background:'#16162a', animation:'pulse 1.5s infinite ease-in-out'}}/>
+                                                <div className="w-[68px] h-5 rounded-lg bg-[#16162a] animate-pulse"/>
                                             </div>
                                         ))}
                                     </div>
                                 ) : teamTasks.length === 0 ? (
-                                    <div style={{padding:'60px 20px',textAlign:'center'}}>
-                                        <CheckSquare size={28} color="#94a3b8" style={{margin:'0 auto 12px'}}/>
-                                        <p style={{color:'white',fontWeight:700,marginBottom:4}}>No tasks in this team yet</p>
-                                        <p style={{color:'#94a3b8',fontSize:13}}>Create a task and assign it to a member.</p>
+                                    <div className="py-15 px-5 text-center" style={{ padding: '60px 20px' }}>
+                                        <CheckSquare size={28} color="#94a3b8" className="mx-auto mb-3"/>
+                                        <p className="text-white font-bold mb-1">No tasks in this team yet</p>
+                                        <p className="text-slate-400 text-[13px]">Create a task and assign it to a member.</p>
                                     </div>
                                 ) : teamTasks.map((task, i) => {
                                     const s = STATUS[task.status] || STATUS.pending;
@@ -671,24 +642,23 @@ export default function Dashboard() {
                                     return (
                                         <div key={task.id}
                                             onClick={() => openEditModal(task)}
-                                            style={{display:'flex',alignItems:'center',gap:14,padding:'13px 22px',borderBottom:i<teamTasks.length-1?'1px solid #1e1e2e':'none',borderLeft:`3px solid ${s.color}`,cursor:'pointer',transition:'background 0.1s'}}
-                                            onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.02)'}
-                                            onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
-                                            <button onClick={e=>{e.stopPropagation();cycleStatus(task);}} title="Click to change status"
-                                                style={{background:'none',border:'none',cursor:'pointer',padding:0,display:'flex',flexShrink:0,color:s.color}}>
+                                            className="flex items-center gap-3.5 py-3 px-5.5 border-b last:border-b-0 border-[#1e1e2e] border-l-[3px] cursor-pointer hover:bg-white/[0.02] transition-all"
+                                            style={{ borderLeftColor: s.color }}>
+                                            <button onClick={(e)=>{e.stopPropagation();cycleStatus(task);}} title="Click to change status"
+                                                className="bg-transparent border-0 cursor-pointer p-0 flex shrink-0" style={{ color: s.color }}>
                                                 <s.Icon size={17} color={s.color}/>
                                             </button>
-                                            <div style={{flex:1,minWidth:0}}>
-                                                <p style={{color:'#e2e8f0',fontWeight:600,fontSize:13,marginBottom:2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{task.title}</p>
-                                                <div style={{display:'flex',alignItems:'center',gap:8,fontSize:11,color:'#94a3b8'}}>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-slate-200 font-semibold text-xs mb-0.5 truncate">{task.title}</p>
+                                                <div className="flex items-center gap-2 text-[11px] text-slate-400">
                                                     <span style={{color: isMyTask ? '#818cf8' : '#cbd5e1', fontWeight: isMyTask ? 700 : 500}}>@{task.assignee_name}{isMyTask ? ' (you)' : ''}</span>
                                                     {task.due_date && <><span>·</span><span>Due {new Date(task.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></>}
                                                 </div>
                                             </div>
-                                            <div style={{display:'flex',alignItems:'center',gap:10,flexShrink:0}}>
-                                                {task.priority && <span style={{width:6,height:6,borderRadius:'50%',background:PRIORITY[task.priority]||'#6b7280'}} title={task.priority}/>}
-                                                <span style={{fontSize:11,fontWeight:700,padding:'4px 9px',borderRadius:7,background:`${s.color}18`,color:s.color}}>{s.label}</span>
-                                                <ChevronRight size={13} color="#334155"/>
+                                            <div className="flex items-center gap-2.5 shrink-0">
+                                                {task.priority && <span className="w-1.5 h-1.5 rounded-full" style={{ background: PRIORITY[task.priority]||'#6b7280' }} title={task.priority}/>}
+                                                <span className="text-[11px] font-bold px-2 py-0.5 rounded transition-all" style={{ backgroundColor: `${s.color}18`, color: s.color }}>{s.label}</span>
+                                                <ChevronRight size={13} className="text-slate-700"/>
                                             </div>
                                         </div>
                                     );
@@ -702,52 +672,52 @@ export default function Dashboard() {
 
         {/* ── ADD MEMBER MODAL ── */}
         {showMemberModal && (
-            <div style={S.overlay} onClick={e=>e.target===e.currentTarget&&setShowMemberModal(false)}>
-                <div style={S.modal}>
-                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:22}}>
-                        <h2 style={{color:'white',fontWeight:800,fontSize:17}}>Add Member to {selectedTeam?.name}</h2>
-                        <button onClick={()=>setShowMemberModal(false)} style={{color:'#475569',background:'none',border:'none',cursor:'pointer',display:'flex'}}>
+            <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-5" onClick={e=>e.target===e.currentTarget&&setShowMemberModal(false)}>
+                <div className="bg-[#0d0d18] border border-slate-700 rounded-2xl p-7 w-full max-w-[480px] max-h-[90vh] overflow-y-auto">
+                    <div className="flex items-center justify-between mb-5">
+                        <h2 className="text-white font-extrabold text-[17px]">Add Member to {selectedTeam?.name}</h2>
+                        <button onClick={()=>setShowMemberModal(false)} className="text-slate-500 bg-transparent border-0 cursor-pointer flex hover:text-slate-300">
                             <X size={20}/>
                         </button>
                     </div>
-                    <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                    <div className="flex flex-col gap-3.5">
                         <div>
-                            <label style={S.label}>Search User</label>
-                            <div style={{position:'relative'}}>
-                                <Search style={{position:'absolute',left:11,top:'50%',transform:'translateY(-50%)',color:'#334155'}} size={14}/>
+                            <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Search User</label>
+                            <div className="relative">
+                                <Search className="absolute left-[11px] top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none" size={14}/>
                                 <input value={userSearch} onChange={e=>setUserSearch(e.target.value)} placeholder="Type username or email…"
-                                    style={{...S.input, paddingLeft:34}}/>
+                                    className="w-full h-10 bg-[#0f0f1a] border border-slate-700 rounded-lg pl-[34px] pr-3 text-xs text-slate-100 placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all"/>
                             </div>
-                            <p style={{fontSize:10, color:'#475569', marginTop:6}}>* Search for users by their username or email address.</p>
+                            <p className="text-[10px] text-slate-500 mt-1.5">* Search for users by their username or email address.</p>
                         </div>
                         
-                        <div style={{maxHeight:200, overflowY:'auto', background:'#0f0f1a', borderRadius:9, border:'1px solid #1e1e2e'}}>
+                        <div className="max-h-[200px] overflow-y-auto bg-[#0f0f1a] rounded-lg border border-[#1e1e2e]">
                             {isSearching ? (
-                                <p style={{padding:15, fontSize:12, color:'#64748b', textAlign:'center'}}>Searching…</p>
+                                <p className="p-3.5 text-xs text-slate-500 text-center">Searching…</p>
                             ) : searchResults.length === 0 ? (
-                                <p style={{padding:15, fontSize:12, color:'#64748b', textAlign:'center'}}>
+                                <p className="p-3.5 text-xs text-slate-500 text-center">
                                     {userSearch.length < 2 ? 'Start typing to search…' : 'No users found.'}
                                 </p>
                             ) : searchResults.map(u => {
                                 const isAlreadyMember = teamMembers.some(m => m.id === u.id);
                                 return (
-                                <div key={u.id} style={{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 15px', borderBottom:'1px solid #1e1e2e'}}>
+                                <div key={u.id} className="flex items-center justify-between p-2.5 px-3.5 border-b last:border-b-0 border-[#1e1e2e]">
                                     <div>
-                                        <p style={{color:'white', fontWeight:600, fontSize:13}}>{u.username}</p>
-                                        <p style={{color:'#475569', fontSize:11}}>{u.email}</p>
+                                        <p className="text-white font-semibold text-[13px]">{u.username}</p>
+                                        <p className="text-slate-500 text-[11px]">{u.email}</p>
                                     </div>
                                     <button 
                                         onClick={() => !isAlreadyMember && handleAddMember(u.id)}
                                         disabled={isAlreadyMember}
-                                        style={{...S.btnGhost, padding:'4px 10px', fontSize:11, color: isAlreadyMember ? '#64748b' : '#818cf8', borderColor: isAlreadyMember ? '#334155' : '#312e81', opacity: isAlreadyMember ? 0.6 : 1, cursor: isAlreadyMember ? 'not-allowed' : 'pointer'}}>
+                                        className={`flex items-center gap-1.5 h-8 px-3 border border-slate-700 rounded-lg font-semibold text-[11px] cursor-pointer transition-colors ${isAlreadyMember ? 'text-slate-500 border-slate-800 opacity-60 cursor-not-allowed' : 'text-indigo-400 border-indigo-900/50 hover:bg-slate-900'}`}>
                                         {isAlreadyMember ? 'Added' : 'Add'}
                                     </button>
                                 </div>
                             )})}
                         </div>
 
-                        <div style={{display:'flex',gap:10,justifyContent:'flex-end',marginTop:4}}>
-                            <button type="button" onClick={()=>setShowMemberModal(false)} style={S.btnGhost}>Close</button>
+                        <div className="flex gap-2.5 justify-end mt-1">
+                            <button type="button" onClick={()=>setShowMemberModal(false)} className="flex items-center gap-1.5 h-[38px] px-4 bg-[#0f0f1a] border border-slate-700 rounded-lg text-slate-200 font-semibold text-xs cursor-pointer hover:bg-slate-900 transition-colors">Close</button>
                         </div>
                     </div>
                 </div>
@@ -756,38 +726,38 @@ export default function Dashboard() {
 
         {/* ── MANAGE MEMBERS MODAL ── */}
         {showManageModal && (
-            <div style={S.overlay} onClick={e=>e.target===e.currentTarget&&setShowManageModal(false)}>
-                <div style={S.modal}>
-                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:22}}>
-                        <h2 style={{color:'white',fontWeight:800,fontSize:17}}>
+            <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-5" onClick={e=>e.target===e.currentTarget&&setShowManageModal(false)}>
+                <div className="bg-[#0d0d18] border border-slate-700 rounded-2xl p-7 w-full max-w-[480px] max-h-[90vh] overflow-y-auto">
+                    <div className="flex items-center justify-between mb-5">
+                        <h2 className="text-white font-extrabold text-[17px]">
                             {manageTeam?.created_by === user?.id ? 'Manage Members' : 'Team Members'}: {manageTeam?.name}
                         </h2>
-                        <button onClick={()=>setShowManageModal(false)} style={{color:'#475569',background:'none',border:'none',cursor:'pointer',display:'flex'}}>
+                        <button onClick={()=>setShowManageModal(false)} className="text-slate-500 bg-transparent border-0 cursor-pointer flex hover:text-slate-300">
                             <X size={20}/>
                         </button>
                     </div>
-                    <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                    <div className="flex flex-col gap-3">
                         {manageMembers.map(m => (
-                            <div key={m.id} style={{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', background:'#0f0f1a', borderRadius:11, border:'1px solid #1e1e2e'}}>
-                                <div style={{display:'flex', alignItems:'center', gap:10}}>
-                                    <div style={{width:30, height:30, borderRadius:8, background:'#4f46e5', display:'flex', alignItems:'center', justifyContent:'center', color:'white', fontWeight:800, fontSize:11}}>
+                            <div key={m.id} className="flex items-center justify-between p-2.5 px-3.5 bg-[#0f0f1a] rounded-[11px] border border-[#1e1e2e]">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-[30px] h-[30px] rounded-lg bg-[#4f46e5] flex items-center justify-center text-white font-extrabold text-[11px] shrink-0">
                                         {m.username?.[0]?.toUpperCase()}
                                     </div>
                                     <div>
-                                        <p style={{color:'white', fontWeight:600, fontSize:13}}>{m.username} {m.id === manageTeam.created_by && <span style={{fontSize:9, color:'#818cf8'}}>(Leader)</span>}</p>
-                                        <p style={{color:'#475569', fontSize:11}}>{m.email}</p>
+                                        <p className="text-white font-semibold text-[13px]">{m.username} {m.id === manageTeam.created_by && <span className="text-[9px] color-[#818cf8] font-bold ml-1">(Leader)</span>}</p>
+                                        <p className="text-slate-500 text-[11px]">{m.email}</p>
                                     </div>
                                 </div>
                                 {manageTeam?.created_by === user?.id && m.id !== manageTeam.created_by && (
-                                    <button onClick={() => handleRemoveMember(m.id)} style={{background:'none', border:'none', color:'#ef4444', fontSize:11, fontWeight:700, cursor:'pointer'}}>
+                                    <button onClick={() => handleRemoveMember(m.id)} className="bg-transparent border-0 text-red-500 text-[11px] font-bold cursor-pointer hover:opacity-80 transition-all">
                                         Remove
                                     </button>
                                 )}
                             </div>
                         ))}
                     </div>
-                    <div style={{display:'flex',justifyContent:'flex-end',marginTop:20}}>
-                        <button onClick={()=>setShowManageModal(false)} style={S.btnGhost}>Close</button>
+                    <div className="flex justify-end mt-5">
+                        <button onClick={()=>setShowManageModal(false)} className="flex items-center gap-1.5 h-[38px] px-4 bg-[#0f0f1a] border border-slate-700 rounded-lg text-slate-200 font-semibold text-xs cursor-pointer hover:bg-slate-900 transition-colors">Close</button>
                     </div>
                 </div>
             </div>
@@ -795,27 +765,27 @@ export default function Dashboard() {
 
         {/* ── NEW TEAM MODAL ── */}
         {showTeamModal && (
-            <div style={S.overlay} onClick={e=>e.target===e.currentTarget&&setShowTeamModal(false)}>
-                <div style={S.modal}>
-                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:22}}>
-                        <h2 style={{color:'white',fontWeight:800,fontSize:17}}>Create New Team</h2>
-                        <button onClick={()=>setShowTeamModal(false)} style={{color:'#475569',background:'none',border:'none',cursor:'pointer',display:'flex'}}>
+            <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-5" onClick={e=>e.target===e.currentTarget&&setShowTeamModal(false)}>
+                <div className="bg-[#0d0d18] border border-slate-700 rounded-2xl p-7 w-full max-w-[480px] max-h-[90vh] overflow-y-auto">
+                    <div className="flex items-center justify-between mb-5">
+                        <h2 className="text-white font-extrabold text-[17px]">Create New Team</h2>
+                        <button onClick={()=>setShowTeamModal(false)} className="text-slate-500 bg-transparent border-0 cursor-pointer flex hover:text-slate-300">
                             <X size={20}/>
                         </button>
                     </div>
-                    <form onSubmit={handleCreateTeam} style={{display:'flex',flexDirection:'column',gap:14}}>
+                    <form onSubmit={handleCreateTeam} className="flex flex-col gap-3.5">
                         <div>
-                            <label style={S.label}>Team Name *</label>
-                            <input required value={teamForm.name} onChange={e=>setTeamForm(f=>({...f,name:e.target.value}))} placeholder="Engineering, Marketing, etc…" style={S.input}/>
+                            <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Team Name *</label>
+                            <input required value={teamForm.name} onChange={e=>setTeamForm(f=>({...f,name:e.target.value}))} placeholder="Engineering, Marketing, etc…" className="w-full h-10 bg-[#0f0f1a] border border-slate-700 rounded-lg px-3 text-xs text-slate-100 placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all"/>
                         </div>
                         <div>
-                            <label style={S.label}>Description</label>
+                            <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Description</label>
                             <textarea value={teamForm.description} onChange={e=>setTeamForm(f=>({...f,description:e.target.value}))} placeholder="What is this team about?" rows={3}
-                                style={{...S.input, resize:'vertical'}}/>
+                                className="w-full bg-[#0f0f1a] border border-slate-700 rounded-lg p-3 text-xs text-slate-100 placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all resize-y"/>
                         </div>
-                        <div style={{display:'flex',gap:10,justifyContent:'flex-end',marginTop:4}}>
-                            <button type="button" onClick={()=>setShowTeamModal(false)} style={S.btnGhost}>Cancel</button>
-                            <button type="submit" disabled={submitting} style={{...S.btn, opacity:submitting?0.6:1}}>
+                        <div className="flex gap-2.5 justify-end mt-1">
+                            <button type="button" onClick={()=>setShowTeamModal(false)} className="flex items-center gap-1.5 h-[38px] px-4 bg-[#0f0f1a] border border-slate-700 rounded-lg text-slate-200 font-semibold text-xs cursor-pointer hover:bg-slate-900 transition-colors">Cancel</button>
+                            <button type="submit" disabled={submitting} className="flex items-center gap-1.5 h-[38px] px-4 bg-[#4f46e5] hover:bg-[#4338ca] border-0 rounded-lg text-white font-bold text-xs cursor-pointer shadow-lg shadow-indigo-600/30 transition-all" style={{ opacity: submitting ? 0.6 : 1 }}>
                                 {submitting ? 'Creating…' : 'Create Team'}
                             </button>
                         </div>
@@ -826,24 +796,24 @@ export default function Dashboard() {
 
         {/* ── NEW TASK MODAL ── */}
         {showModal && (
-            <div style={S.overlay} onClick={e=>e.target===e.currentTarget&&setShowModal(false)}>
-                <div style={S.modal}>
+            <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-5" onClick={e=>e.target===e.currentTarget&&setShowModal(false)}>
+                <div className="bg-[#0d0d18] border border-slate-700 rounded-2xl p-7 w-full max-w-[480px] max-h-[90vh] overflow-y-auto">
                     {/* Modal header */}
-                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:22}}>
-                        <h2 style={{color:'white',fontWeight:800,fontSize:17}}>{editingTask ? 'Edit Task' : 'Create New Task'}</h2>
-                        <div style={{display:'flex', alignItems:'center', gap:10}}>
+                    <div className="flex items-center justify-between mb-5">
+                        <h2 className="text-white font-extrabold text-[17px]">{editingTask ? 'Edit Task' : 'Create New Task'}</h2>
+                        <div className="flex items-center gap-2.5">
                             {editingTask && teams.find(t=>t.id===editingTask.team_id)?.created_by === user?.id && (
-                                <button onClick={() => handleDeleteTask(editingTask.id)} style={{background:'none', border:'none', color:'#ef4444', fontSize:11, fontWeight:700, cursor:'pointer'}}>
+                                <button onClick={() => handleDeleteTask(editingTask.id)} className="bg-transparent border-0 text-red-500 text-[11px] font-bold cursor-pointer hover:opacity-85 transition-all">
                                     Delete
                                 </button>
                             )}
-                            <button onClick={()=>setShowModal(false)} style={{color:'#475569',background:'none',border:'none',cursor:'pointer',display:'flex'}}>
+                            <button onClick={()=>setShowModal(false)} className="text-slate-500 bg-transparent border-0 cursor-pointer flex hover:text-slate-300">
                                 <X size={20}/>
                             </button>
                         </div>
                     </div>
 
-                    <form onSubmit={handleSubmit} style={{display:'flex',flexDirection:'column',gap:14}}>
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
                         {(() => {
                             const activeTeam = teams.find(t => t.id === (editingTask ? editingTask.team_id : parseInt(form.team_id)));
                             const isLeader = activeTeam?.created_by === user?.id;
@@ -851,25 +821,25 @@ export default function Dashboard() {
 
                             if (isMemberEdit) {
                                 return (
-                                    <div style={{display:'flex', flexDirection:'column', gap:18}}>
-                                        <div style={{background:'#0f0f1a', padding:18, borderRadius:14, border:'1px solid #334155'}}>
-                                            <h3 style={{color:'white', fontSize:15, fontWeight:700, marginBottom:8}}>{form.title}</h3>
-                                            <p style={{color:'#cbd5e1', fontSize:13, lineHeight:1.5}}>{form.description || 'No description provided.'}</p>
-                                            <div style={{display:'flex', gap:12, marginTop:14, paddingTop:14, borderTop:'1px solid #334155'}}>
+                                    <div className="flex flex-col gap-4.5">
+                                        <div className="bg-[#0f0f1a] p-4.5 rounded-[14px] border border-slate-700" style={{ padding: '18px' }}>
+                                            <h3 className="text-white font-bold text-[15px] mb-2">{form.title}</h3>
+                                            <p className="text-[#cbd5e1] text-xs leading-relaxed">{form.description || 'No description provided.'}</p>
+                                            <div className="flex gap-3 mt-3.5 pt-3.5 border-t border-slate-700" style={{ marginTop: '14px', paddingTop: '14px' }}>
                                                 <div>
-                                                    <p style={S.label}>Priority</p>
-                                                    <span style={{fontSize:12, color:PRIORITY[form.priority]||'#cbd5e1', fontWeight:700, textTransform:'capitalize'}}>{form.priority}</span>
+                                                    <p className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Priority</p>
+                                                    <span className="text-xs font-bold capitalize" style={{ color: PRIORITY[form.priority]||'#cbd5e1' }}>{form.priority}</span>
                                                 </div>
-                                                <div>
-                                                    <p style={S.label}>Due Date</p>
-                                                    <span style={{fontSize:12, color:'#cbd5e1'}}>{form.due_date ? new Date(form.due_date).toLocaleDateString() : 'No date'}</span>
+                                                <div style={{ marginLeft: '12px' }}>
+                                                    <p className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Due Date</p>
+                                                    <span className="text-xs text-[#cbd5e1]">{form.due_date ? new Date(form.due_date).toLocaleDateString() : 'No date'}</span>
                                                 </div>
                                             </div>
                                         </div>
                                         <div>
-                                            <label style={S.label}>Update Progress</label>
+                                            <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Update Progress</label>
                                             <select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))} 
-                                                style={{...S.input, height:48, fontSize:14, fontWeight:600, border:'1px solid #4f46e5', color:'#f8fafc'}}>
+                                                className="w-full h-12 bg-[#0f0f1a] border border-indigo-500 rounded-lg px-3.5 text-sm font-semibold text-slate-100 outline-none focus:ring-4 focus:ring-indigo-500/10">
                                                 <option value="pending">Pending</option>
                                                 <option value="in_progress">In Progress</option>
                                                 <option value="completed">Completed</option>
@@ -882,34 +852,34 @@ export default function Dashboard() {
                             return (
                             <>
                             <div>
-                                <label style={S.label}>Title *</label>
-                                <input required value={form.title} onChange={e=>setForm(f=>({...f,title:e.target.value}))} placeholder="Task title…" style={S.input}/>
+                                <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Title *</label>
+                                <input required value={form.title} onChange={e=>setForm(f=>({...f,title:e.target.value}))} placeholder="Task title…" className="w-full h-10 bg-[#0f0f1a] border border-slate-700 rounded-lg px-3 text-xs text-slate-100 placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all"/>
                             </div>
                             <div>
-                                <label style={S.label}>Description</label>
+                                <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Description</label>
                                 <textarea value={form.description} onChange={e=>setForm(f=>({...f,description:e.target.value}))} placeholder="Optional description…" rows={3}
-                                    style={{...S.input, resize:'vertical'}}/>
+                                    className="w-full bg-[#0f0f1a] border border-slate-700 rounded-lg p-3 text-xs text-slate-100 placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all resize-y"/>
                             </div>
-                            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+                            <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label style={S.label}>Team *</label>
-                                    <select required disabled={editingTask} value={form.team_id} onChange={e=>handleTeamChange(e.target.value)} style={S.input}>
+                                    <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Team *</label>
+                                    <select required disabled={editingTask} value={form.team_id} onChange={e=>handleTeamChange(e.target.value)} className="w-full h-10 bg-[#0f0f1a] border border-slate-700 rounded-lg px-3 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all disabled:opacity-50">
                                         <option value="">Select team…</option>
                                         {teams.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
                                     </select>
                                 </div>
                                 <div>
-                                    <label style={S.label}>Assign To</label>
-                                    <select value={form.assigned_to} onChange={e=>setForm(f=>({...f,assigned_to:e.target.value}))} style={S.input}>
+                                    <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Assign To</label>
+                                    <select value={form.assigned_to} onChange={e=>setForm(f=>({...f,assigned_to:e.target.value}))} className="w-full h-10 bg-[#0f0f1a] border border-slate-700 rounded-lg px-3 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all">
                                         <option value="">Unassigned</option>
                                         {teamMembers.map(m=><option key={m.id} value={m.id}>{m.username}</option>)}
                                     </select>
                                 </div>
                             </div>
-                            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+                            <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label style={S.label}>Priority</label>
-                                    <select value={form.priority} onChange={e=>setForm(f=>({...f,priority:e.target.value}))} style={S.input}>
+                                    <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Priority</label>
+                                    <select value={form.priority} onChange={e=>setForm(f=>({...f,priority:e.target.value}))} className="w-full h-10 bg-[#0f0f1a] border border-slate-700 rounded-lg px-3 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all">
                                         <option value="low">Low</option>
                                         <option value="medium">Medium</option>
                                         <option value="high">High</option>
@@ -917,27 +887,27 @@ export default function Dashboard() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label style={S.label}>Status</label>
-                                    <select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))} style={S.input}>
+                                    <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Status</label>
+                                    <select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))} className="w-full h-10 bg-[#0f0f1a] border border-slate-700 rounded-lg px-3 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all">
                                         <option value="pending">Pending</option>
                                         <option value="in_progress">In Progress</option>
                                         <option value="completed">Completed</option>
                                     </select>
                                 </div>
                             </div>
-                            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+                            <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label style={S.label}>Due Date</label>
-                                    <input type="date" value={form.due_date} onChange={e=>setForm(f=>({...f,due_date:e.target.value}))} style={S.input}/>
+                                    <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Due Date</label>
+                                    <input type="date" value={form.due_date} onChange={e=>setForm(f=>({...f,due_date:e.target.value}))} className="w-full h-10 bg-[#0f0f1a] border border-slate-700 rounded-lg px-3 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all"/>
                                 </div>
                             </div>
                             </>
                             );
                         })()}
 
-                        <div style={{display:'flex',gap:10,justifyContent:'flex-end',marginTop:4}}>
-                            <button type="button" onClick={()=>setShowModal(false)} style={S.btnGhost}>Cancel</button>
-                            <button type="submit" disabled={submitting} style={{...S.btn, opacity:submitting?0.6:1}}>
+                        <div className="flex gap-2.5 justify-end mt-1">
+                            <button type="button" onClick={()=>setShowModal(false)} className="flex items-center gap-1.5 h-[38px] px-4 bg-[#0f0f1a] border border-slate-700 rounded-lg text-slate-200 font-semibold text-xs cursor-pointer hover:bg-slate-900 transition-colors">Cancel</button>
+                            <button type="submit" disabled={submitting} className="flex items-center gap-1.5 h-[38px] px-4 bg-[#4f46e5] hover:bg-[#4338ca] border-0 rounded-lg text-white font-bold text-xs cursor-pointer shadow-lg shadow-indigo-600/30 transition-all" style={{ opacity: submitting ? 0.6 : 1 }}>
                                 {submitting ? (editingTask ? 'Updating…' : 'Creating…') : (editingTask ? 'Update Task' : 'Create Task')}
                             </button>
                         </div>
@@ -948,53 +918,27 @@ export default function Dashboard() {
 
         {/* ── CUSTOM THEME-MATCHING CONFIRMATION MODAL ── */}
         {confirmAction && (
-            <div style={S.overlay}>
-                <div style={{
-                    ...S.modal, 
-                    maxWidth: 400, 
-                    border: '1px solid #ef444433', 
-                    boxShadow: '0 20px 40px -15px rgba(239, 68, 68, 0.15)'
-                }}>
-                    <h2 style={{
-                        color: '#f8fafc',
-                        fontSize: 16,
-                        fontWeight: 800,
-                        marginBottom: 12,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 8
-                    }}>
+            <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-5">
+                <div className="bg-[#0d0d18] border border-red-500/20 rounded-2xl p-7 w-full max-w-[400px] shadow-2xl shadow-red-500/5">
+                    <h2 className="text-slate-100 font-extrabold text-base mb-3 flex items-center gap-2">
                         <AlertCircle size={18} color="#ef4444" />
                         Confirm Action
                     </h2>
-                    <p style={{
-                        color: '#cbd5e1',
-                        fontSize: 13,
-                        lineHeight: 1.5,
-                        marginBottom: 20
-                    }}>
+                    <p className="text-slate-300 text-[13px] leading-relaxed mb-5">
                         {confirmAction.message}
                     </p>
-                    <div style={{
-                        display: 'flex',
-                        gap: 10,
-                        justifyContent: 'flex-end'
-                    }}>
+                    <div className="flex gap-2.5 justify-end mt-1">
                         <button 
                             type="button" 
                             onClick={() => setConfirmAction(null)} 
-                            style={S.btnGhost}
+                            className="flex items-center gap-1.5 h-[38px] px-4 bg-[#0f0f1a] border border-slate-700 rounded-lg text-slate-200 font-semibold text-xs cursor-pointer hover:bg-slate-900 transition-colors"
                         >
                             Cancel
                         </button>
                         <button 
                             type="button" 
                             onClick={confirmAction.onConfirm} 
-                            style={{
-                                ...S.btn, 
-                                background: '#ef4444', 
-                                color: 'white'
-                            }}
+                            className="flex items-center gap-1.5 h-[38px] px-4 bg-red-500 hover:bg-red-600 border-0 rounded-lg text-white font-bold text-xs cursor-pointer transition-colors"
                         >
                             Yes, Remove
                         </button>
@@ -1005,32 +949,12 @@ export default function Dashboard() {
 
         {/* ── PREMIUM TOAST NOTIFICATION SYSTEM ── */}
         {toast && (
-            <div style={{
-                position: 'fixed',
-                bottom: 24,
-                right: 24,
-                background: 'rgba(10, 10, 20, 0.85)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                border: `1px solid ${toast.type === 'success' ? '#10b98133' : '#ef444433'}`,
-                borderRadius: 12,
-                padding: '12px 20px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                boxShadow: '0 10px 30px -10px rgba(0, 0, 0, 0.7)',
-                zIndex: 9999,
-                animation: 'pulse 2s infinite ease-in-out',
-                transition: 'all 0.3s ease'
-            }}>
-                <div style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    background: toast.type === 'success' ? '#10b981' : '#ef4444',
+            <div className={`fixed bottom-6 right-6 bg-[#0a0a14]/85 backdrop-blur-md border rounded-xl py-3 px-5 flex items-center gap-3 shadow-2xl z-[9999] transition-all animate-pulse ${toast.type === 'success' ? 'border-emerald-500/20' : 'border-red-500/20'}`}>
+                <div className="w-2 h-2 rounded-full shadow-[0_0_10px]" style={{
+                    backgroundColor: toast.type === 'success' ? '#10b981' : '#ef4444',
                     boxShadow: `0 0 10px ${toast.type === 'success' ? '#10b981' : '#ef4444'}`
                 }}/>
-                <p style={{ color: '#f8fafc', fontSize: 13, fontWeight: 600, margin: 0 }}>
+                <p className="color-[#f8fafc] text-[13px] font-semibold m-0">
                     {toast.message}
                 </p>
             </div>

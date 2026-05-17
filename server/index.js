@@ -31,14 +31,23 @@ app.use(cors({
 // Serve static files from React build directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// session stored in postgres
-app.use(session({
-    store: new pgSession({
+// session stored in postgres, fallback to memory in dev
+let sessionStore;
+if (process.env.NODE_ENV === 'production' || process.env.DATABASE_URL) {
+    sessionStore = new pgSession({
         pool: pool,
         tableName: 'session',
         schemaName: 'public'
-    }),
-    secret: process.env.SESSION_SECRET,
+    });
+    console.log('Session store: PostgreSQL (connect-pg-simple)');
+} else {
+    sessionStore = new session.MemoryStore();
+    console.log('Session store: MemoryStore (Dev Fallback)');
+}
+
+app.use(session({
+    store: sessionStore,
+    secret: process.env.SESSION_SECRET || 'dev_session_secret_123',
     resave: false,
     saveUninitialized: false,
     cookie: {

@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 const passport = require('passport');
 const Joi = require('joi');
 const pool = require('../db');
+const { isAuthenticated } = require('../middleware/auth');
+
 
 // validation schemas using Joi
 const registerSchema = Joi.object({
@@ -111,7 +113,7 @@ router.get('/me', (req, res) => {
 });
 
 // GET /api/auth/users/search - find users by username or email
-router.get('/users/search', async (req, res) => {
+router.get('/users/search', isAuthenticated, async (req, res) => {
     const { q } = req.query;
     if (!q || q.length < 2) return res.json([]);
     try {
