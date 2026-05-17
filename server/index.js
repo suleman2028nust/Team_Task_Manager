@@ -5,7 +5,7 @@ const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const passport = require('passport');
 const pool = require('./db');
-
+const path = require('path');
 
 // passport config has to be required after pool is ready
 require('./config/passport')(passport);
@@ -16,17 +16,20 @@ const taskRoutes = require('./routes/tasks');
 const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 
 // middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// allow the react frontend to talk to us
+// allow the react frontend to talk to us (for local dev)
 app.use(cors({
     origin: 'http://localhost:5173',
     credentials: true
 }));
+
+// Serve static files from React build directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // session stored in postgres
 app.use(session({
@@ -54,10 +57,11 @@ app.use('/api/teams', teamRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
-app.get('/', (req, res) => {
-    res.json({ message: 'Team Task Manager API running' });
+// Fallback to React index.html for Single Page Application routing (React Router)
+app.use((req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on port ${PORT}`);
 });

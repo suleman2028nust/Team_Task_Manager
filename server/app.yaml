@@ -1,0 +1,9 @@
+runtime: nodejs20
+
+instance_class: F1
+
+env_variables:
+  DATABASE_URL: "postgresql://neondb_owner:npg_uxJ27oHKOidC@ep-little-bar-aob3pucy-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb"
+  SESSION_SECRET: "somereallylongsecretstring123"
+  NODE_ENV: "production"
+  PORT: "8080"
