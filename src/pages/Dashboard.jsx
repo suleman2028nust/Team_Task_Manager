@@ -61,7 +61,15 @@ export default function Dashboard() {
     const [manageMembers, setManageMembers] = useState([]);
     const [selectedTeamView, setSelectedTeamView] = useState(null); // team clicked to view tasks
     const [teamTasks, setTeamTasks] = useState([]);
+    const [loadingTeamTasks, setLoadingTeamTasks] = useState(false);
+    const [toast, setToast] = useState(null); // { message: '', type: 'success' | 'error' }
+    const [confirmAction, setConfirmAction] = useState(null); // { message: '', onConfirm: () => void }
     const navigate = useNavigate();
+
+    const showToast = (message, type = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     const [showSidebar, setShowSidebar] = useState(window.innerWidth > 768);
 
@@ -92,6 +100,11 @@ export default function Dashboard() {
             setTeams(teamsRes.data);
             const tasksRes = await api.get('/tasks');
             setTasks(tasksRes.data);
+            
+            if (selectedTeamView) {
+                const res = await api.get(`/teams/${selectedTeamView.id}/tasks`);
+                setTeamTasks(res.data);
+            }
         } catch (err) {
             console.error("Refresh error:", err);
         }
@@ -196,9 +209,9 @@ export default function Dashboard() {
             setShowMemberModal(false);
             setUserSearch('');
             setSearchResults([]);
-            alert('Member added successfully!');
+            showToast('Member added successfully!', 'success');
         } catch (err) {
-            alert(err.response?.data?.message || 'Could not add member');
+            showToast(err.response?.data?.message || 'Could not add member', 'error');
         }
     };
 
@@ -227,8 +240,9 @@ export default function Dashboard() {
             setShowTeamModal(false);
             setTeamForm({ name: '', description: '' });
             await refresh();
+            showToast('Team created successfully!', 'success');
         } catch (err) {
-            alert(err.response?.data?.message || 'Could not create team');
+            showToast(err.response?.data?.message || 'Could not create team', 'error');
         } finally { setSubmitting(false); }
     };
 
@@ -244,10 +258,12 @@ export default function Dashboard() {
     const viewTeamTasks = async (team) => {
         setSelectedTeamView(team);
         setTeamTasks([]); // clear immediately so stale data doesn't flash
+        setLoadingTeamTasks(true);
         try {
             const res = await api.get(`/teams/${team.id}/tasks`);
             setTeamTasks(res.data);
         } catch (err) { console.error('Team tasks error', err); setTeamTasks([]); }
+        finally { setLoadingTeamTasks(false); }
     };
 
     const openAddMemberModal = async (team) => {
@@ -261,25 +277,37 @@ export default function Dashboard() {
 
     const handleRemoveMember = async (userId) => {
         if (!manageTeam || !userId) return;
-        if (!window.confirm("Are you sure you want to remove this member?")) return;
-        try {
-            await api.delete(`/teams/${manageTeam.id}/members/${userId}`);
-            const res = await api.get(`/teams/${manageTeam.id}/members`);
-            setManageMembers(res.data);
-            await refresh();
-        } catch (err) {
-            alert(err.response?.data?.message || 'Could not remove member');
-        }
+        setConfirmAction({
+            message: "Are you sure you want to remove this member from the team?",
+            onConfirm: async () => {
+                try {
+                    await api.delete(`/teams/${manageTeam.id}/members/${userId}`);
+                    const res = await api.get(`/teams/${manageTeam.id}/members`);
+                    setManageMembers(res.data);
+                    await refresh();
+                    showToast('Member removed successfully!', 'success');
+                } catch (err) {
+                    showToast(err.response?.data?.message || 'Could not remove member', 'error');
+                }
+                setConfirmAction(null);
+            }
+        });
     };
 
     const handleDeleteTeam = async (teamId) => {
-        if (!window.confirm("Are you sure? This will delete the team and all its tasks permanently.")) return;
-        try {
-            await api.delete(`/teams/${teamId}`);
-            await refresh();
-        } catch (err) {
-            alert(err.response?.data?.message || 'Could not delete team');
-        }
+        setConfirmAction({
+            message: "Are you sure? This will delete the team and all its tasks permanently.",
+            onConfirm: async () => {
+                try {
+                    await api.delete(`/teams/${teamId}`);
+                    await refresh();
+                    showToast('Team deleted successfully!', 'success');
+                } catch (err) {
+                    showToast(err.response?.data?.message || 'Could not delete team', 'error');
+                }
+                setConfirmAction(null);
+            }
+        });
     };
 
     /* ── filtered tasks ── */
@@ -355,7 +383,7 @@ export default function Dashboard() {
 
                 {/* Nav */}
                 <nav style={{flex:1,padding:'14px 10px',overflowY:'auto'}}>
-                    <p style={{fontSize:10,fontWeight:700,color:'#334155',letterSpacing:'0.1em',textTransform:'uppercase',padding:'0 8px',marginBottom:6}}>Workspace</p>
+                    <p style={{fontSize:10,fontWeight:700,color:'#64748b',letterSpacing:'0.1em',textTransform:'uppercase',padding:'0 8px',marginBottom:6}}>Workspace</p>
                     {[
                         { id:'tasks', label:'Tasks', Icon:CheckSquare, badge:stats.total },
                         { id:'teams', label:'Teams', Icon:Users,       badge:stats.teams },
@@ -372,11 +400,11 @@ export default function Dashboard() {
                         );
                     })}
 
-                    <p style={{fontSize:10,fontWeight:700,color:'#334155',letterSpacing:'0.1em',textTransform:'uppercase',padding:'0 8px',margin:'18px 0 6px'}}>My Teams</p>
+                    <p style={{fontSize:10,fontWeight:700,color:'#64748b',letterSpacing:'0.1em',textTransform:'uppercase',padding:'0 8px',margin:'18px 0 6px'}}>My Teams</p>
                     {teams.length === 0
                         ? <p style={{fontSize:12,color:'#334155',padding:'0 8px'}}>No teams yet</p>
                         : teams.map((t,i) => (
-                            <button key={t.id} onClick={()=>{setActiveNav('teams');}} style={{width:'100%',display:'flex',alignItems:'center',gap:9,padding:'7px 10px',borderRadius:9,color:'#64748b',fontWeight:600,fontSize:12,border:'none',background:'transparent',cursor:'pointer'}}>
+                            <button key={t.id} onClick={()=>{setActiveNav('teams'); viewTeamTasks(t);}} style={{width:'100%',display:'flex',alignItems:'center',gap:9,padding:'7px 10px',borderRadius:9,color:'#64748b',fontWeight:600,fontSize:12,border:'none',background:'transparent',cursor:'pointer'}}>
                                 <span style={{width:7,height:7,borderRadius:'50%',background:teamColors[i%teamColors.length],flexShrink:0}}/>
                                 {t.name}
                             </button>
@@ -392,7 +420,6 @@ export default function Dashboard() {
                         </div>
                         <div style={{flex:1,minWidth:0}}>
                             <p style={{color:'white',fontWeight:700,fontSize:13,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{user?.username}</p>
-                            <p style={{color:'#475569',fontSize:10,fontWeight:500}}>Pro Account</p>
                         </div>
                         <button onClick={handleLogout} style={{color:'#334155',background:'none',border:'none',cursor:'pointer',display:'flex',padding:3}}>
                             <LogOut size={14}/>
@@ -449,16 +476,16 @@ export default function Dashboard() {
                                 <h1 style={{color:'white',fontWeight:900,fontSize:22,letterSpacing:'-0.4px',marginBottom:4}}>
                                     Good to see you, {user?.username} 👋
                                 </h1>
-                                <p style={{color:'#475569',fontSize:13}}>
+                                <p style={{color:'#94a3b8',fontSize:13}}>
                                     {tasks.length === 0 ? "No tasks assigned to you yet." : `${tasks.filter(t=>t.status!=='completed').length} active task(s) assigned to you.`}
                                 </p>
                                 
                                 {/* Reminders */}
-                                {tasks.some(t => t.status !== 'completed' && t.due_date && new Date(t.due_date) <= new Date()) && (
+                                {tasks.some(t => t.status !== 'completed' && t.due_date && new Date(t.due_date) <= new Date(Date.now() + 24 * 60 * 60 * 1000)) && (
                                     <div style={{marginTop:14, padding:12, background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:9, display:'flex', alignItems:'center', gap:10}}>
                                         <AlertCircle size={16} color="#ef4444"/>
                                         <span style={{fontSize:12, color:'#f87171', fontWeight:600}}>
-                                            Attention: You have tasks that are due or overdue!
+                                            Attention: You have tasks that are due within 24 hours or overdue!
                                         </span>
                                     </div>
                                 )}
@@ -474,7 +501,7 @@ export default function Dashboard() {
                                 ].map(s=>(
                                     <div key={s.label} style={{...S.card, padding:18}}>
                                         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
-                                            <p style={{fontSize:10,fontWeight:700,color:'#475569',textTransform:'uppercase',letterSpacing:'0.08em'}}>{s.label}</p>
+                                            <p style={{fontSize:10,fontWeight:700,color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.08em'}}>{s.label}</p>
                                             <div style={{width:30,height:30,borderRadius:8,background:`${s.accent}20`,display:'flex',alignItems:'center',justifyContent:'center'}}>
                                                 <s.Icon size={14} color={s.accent}/>
                                             </div>
@@ -511,7 +538,7 @@ export default function Dashboard() {
                                             </button>
                                             <div style={{flex:1,minWidth:0}}>
                                                 <p style={{color:'#e2e8f0',fontWeight:600,fontSize:13,marginBottom:2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{task.title}</p>
-                                                <div style={{display:'flex',alignItems:'center',gap:8,fontSize:11,color:'#475569'}}>
+                                                <div style={{display:'flex',alignItems:'center',gap:8,fontSize:11,color:'#94a3b8'}}>
                                                     <span>{task.team_name||'General'}</span>
                                                     {task.due_date && <><span>·</span><span>Due {new Date(task.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></>}
                                                     {task.assignee_name && task.assignee_name !== 'Unassigned' && <><span>·</span><span>@{task.assignee_name}</span></>}
@@ -590,7 +617,10 @@ export default function Dashboard() {
                                                 )}
                                             </div>
                                             {isLeader && (
-                                                <button onClick={() => handleDeleteTeam(t.id)} style={{width:'100%', marginTop:8, background:'none', border:'none', color:'#450a0a', fontSize:10, fontWeight:700, cursor:'pointer', textAlign:'center'}}>
+                                                <button onClick={() => handleDeleteTeam(t.id)} 
+                                                    style={{width:'100%', marginTop:10, background:'none', border:'none', color:'#ef4444', fontSize:11, fontWeight:700, cursor:'pointer', textAlign:'center', transition:'opacity 0.2s'}}
+                                                    onMouseEnter={e=>e.currentTarget.style.opacity='0.8'}
+                                                    onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
                                                     Delete Team
                                                 </button>
                                             )}
@@ -616,7 +646,20 @@ export default function Dashboard() {
                                 </div>
                             </div>
                             <div style={S.card}>
-                                {teamTasks.length === 0 ? (
+                                {loadingTeamTasks ? (
+                                    <div style={{padding:'20px 22px', display:'flex', flexDirection:'column', gap:16}}>
+                                        {[1, 2, 3].map(n => (
+                                            <div key={n} style={{display:'flex', alignItems:'center', gap:14, padding:'13px 0', borderBottom:n<3?'1px solid #1e1e2e':'none'}}>
+                                                <div style={{width:17, height:17, borderRadius:'50%', background:'#16162a', animation:'pulse 1.5s infinite ease-in-out'}}/>
+                                                <div style={{flex:1}}>
+                                                    <div style={{width:'35%', height:12, borderRadius:4, background:'#16162a', marginBottom:8, animation:'pulse 1.5s infinite ease-in-out'}}/>
+                                                    <div style={{width:'18%', height:8, borderRadius:4, background:'#16162a', animation:'pulse 1.5s infinite ease-in-out'}}/>
+                                                </div>
+                                                <div style={{width:68, height:20, borderRadius:8, background:'#16162a', animation:'pulse 1.5s infinite ease-in-out'}}/>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : teamTasks.length === 0 ? (
                                     <div style={{padding:'60px 20px',textAlign:'center'}}>
                                         <CheckSquare size={28} color="#94a3b8" style={{margin:'0 auto 12px'}}/>
                                         <p style={{color:'white',fontWeight:700,marginBottom:4}}>No tasks in this team yet</p>
@@ -637,8 +680,8 @@ export default function Dashboard() {
                                             </button>
                                             <div style={{flex:1,minWidth:0}}>
                                                 <p style={{color:'#e2e8f0',fontWeight:600,fontSize:13,marginBottom:2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{task.title}</p>
-                                                <div style={{display:'flex',alignItems:'center',gap:8,fontSize:11,color:'#475569'}}>
-                                                    <span style={{color: isMyTask ? '#818cf8' : '#475569', fontWeight: isMyTask ? 700 : 400}}>@{task.assignee_name}{isMyTask ? ' (you)' : ''}</span>
+                                                <div style={{display:'flex',alignItems:'center',gap:8,fontSize:11,color:'#94a3b8'}}>
+                                                    <span style={{color: isMyTask ? '#818cf8' : '#cbd5e1', fontWeight: isMyTask ? 700 : 500}}>@{task.assignee_name}{isMyTask ? ' (you)' : ''}</span>
                                                     {task.due_date && <><span>·</span><span>Due {new Date(task.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></>}
                                                 </div>
                                             </div>
@@ -827,9 +870,9 @@ export default function Dashboard() {
                                             <label style={S.label}>Update Progress</label>
                                             <select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))} 
                                                 style={{...S.input, height:48, fontSize:14, fontWeight:600, border:'1px solid #4f46e5', color:'#f8fafc'}}>
-                                                <option value="pending">⏳ Pending</option>
-                                                <option value="in_progress">🚀 In Progress</option>
-                                                <option value="completed">✅ Completed</option>
+                                                <option value="pending">Pending</option>
+                                                <option value="in_progress">In Progress</option>
+                                                <option value="completed">Completed</option>
                                             </select>
                                         </div>
                                     </div>
@@ -900,6 +943,96 @@ export default function Dashboard() {
                         </div>
                     </form>
                 </div>
+            </div>
+        )}
+
+        {/* ── CUSTOM THEME-MATCHING CONFIRMATION MODAL ── */}
+        {confirmAction && (
+            <div style={S.overlay}>
+                <div style={{
+                    ...S.modal, 
+                    maxWidth: 400, 
+                    border: '1px solid #ef444433', 
+                    boxShadow: '0 20px 40px -15px rgba(239, 68, 68, 0.15)'
+                }}>
+                    <h2 style={{
+                        color: '#f8fafc',
+                        fontSize: 16,
+                        fontWeight: 800,
+                        marginBottom: 12,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8
+                    }}>
+                        <AlertCircle size={18} color="#ef4444" />
+                        Confirm Action
+                    </h2>
+                    <p style={{
+                        color: '#cbd5e1',
+                        fontSize: 13,
+                        lineHeight: 1.5,
+                        marginBottom: 20
+                    }}>
+                        {confirmAction.message}
+                    </p>
+                    <div style={{
+                        display: 'flex',
+                        gap: 10,
+                        justifyContent: 'flex-end'
+                    }}>
+                        <button 
+                            type="button" 
+                            onClick={() => setConfirmAction(null)} 
+                            style={S.btnGhost}
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            type="button" 
+                            onClick={confirmAction.onConfirm} 
+                            style={{
+                                ...S.btn, 
+                                background: '#ef4444', 
+                                color: 'white'
+                            }}
+                        >
+                            Yes, Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* ── PREMIUM TOAST NOTIFICATION SYSTEM ── */}
+        {toast && (
+            <div style={{
+                position: 'fixed',
+                bottom: 24,
+                right: 24,
+                background: 'rgba(10, 10, 20, 0.85)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: `1px solid ${toast.type === 'success' ? '#10b98133' : '#ef444433'}`,
+                borderRadius: 12,
+                padding: '12px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                boxShadow: '0 10px 30px -10px rgba(0, 0, 0, 0.7)',
+                zIndex: 9999,
+                animation: 'pulse 2s infinite ease-in-out',
+                transition: 'all 0.3s ease'
+            }}>
+                <div style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    background: toast.type === 'success' ? '#10b981' : '#ef4444',
+                    boxShadow: `0 0 10px ${toast.type === 'success' ? '#10b981' : '#ef4444'}`
+                }}/>
+                <p style={{ color: '#f8fafc', fontSize: 13, fontWeight: 600, margin: 0 }}>
+                    {toast.message}
+                </p>
             </div>
         )}
         </>
