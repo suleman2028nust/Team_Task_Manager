@@ -12,6 +12,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "bcrypt": "^6.0.0",
     "connect-pg-simple": "^10.0.0",
     "cors": "^2.8.6",
@@ -21,7 +22,8 @@
     "joi": "^18.2.1",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
-    "pg": "^8.20.0"
+    "pg": "^8.20.0",
+    "ws": "^8.20.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

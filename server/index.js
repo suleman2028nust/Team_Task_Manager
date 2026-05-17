@@ -1,10 +1,11 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const passport = require('passport');
 const pool = require('./db');
-require('dotenv').config();
+
 
 // passport config has to be required after pool is ready
 require('./config/passport')(passport);

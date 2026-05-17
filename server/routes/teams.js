@@ -100,6 +100,45 @@ router.get('/:id/members', isAuthenticated, async (req, res) => {
     }
 });
 
+// GET /api/teams/:id/tasks - get all tasks for a specific team
+router.get('/:id/tasks', isAuthenticated, async (req, res) => {
+    try {
+        // Verify user is a member of this team
+        const membership = await pool.query(
+            'SELECT 1 FROM team_members WHERE team_id = $1 AND user_id = $2',
+            [req.params.id, req.user.id]
+        );
+        if (membership.rows.length === 0) {
+            return res.status(403).json({ message: 'You are not a member of this team' });
+        }
+
+        const result = await pool.query(`
+            SELECT
+                t.id,
+                t.title,
+                t.description,
+                t.status,
+                t.priority,
+                t.due_date,
+                t.created_at,
+                t.assigned_to,
+                t.team_id,
+                tm.name AS team_name,
+                COALESCE(u.username, 'Unassigned') AS assignee_name
+            FROM tasks t
+            JOIN teams tm ON t.team_id = tm.id
+            LEFT JOIN users u ON t.assigned_to = u.id
+            WHERE t.team_id = $1
+            ORDER BY t.created_at DESC`,
+            [req.params.id]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error('GET /teams/:id/tasks error:', err.message);
+        res.status(500).json({ message: 'Could not fetch team tasks', error: err.message });
+    }
+});
+
 // DELETE /api/teams/:id/members/:userId - remove a member from a team (only creator can remove)
 router.delete('/:id/members/:userId', isAuthenticated, async (req, res) => {
     const { id, userId } = req.params;

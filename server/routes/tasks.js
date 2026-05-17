@@ -14,11 +14,11 @@ const taskSchema = Joi.object({
     due_date:    Joi.date().optional().allow(null)
 });
 
-// GET /api/tasks - all tasks for this user
+// GET /api/tasks - only tasks assigned to the logged-in user (personal task list)
 router.get('/', isAuthenticated, async (req, res) => {
     try {
-        const result = await pool.query(
-            `SELECT
+        const result = await pool.query(`
+            SELECT
                 t.id,
                 t.title,
                 t.description,
@@ -28,13 +28,13 @@ router.get('/', isAuthenticated, async (req, res) => {
                 t.created_at,
                 t.assigned_to,
                 t.team_id,
-                COALESCE(tm.name, 'General')      AS team_name,
+                COALESCE(tm.name, 'General') AS team_name,
                 COALESCE(u.username, 'Unassigned') AS assignee_name
-             FROM tasks t
-             LEFT JOIN teams  tm ON t.team_id    = tm.id
-             LEFT JOIN users  u  ON t.assigned_to = u.id
-             WHERE t.created_by = $1 OR t.assigned_to = $1
-             ORDER BY t.created_at DESC`,
+            FROM tasks t
+            LEFT JOIN teams tm ON t.team_id = tm.id
+            LEFT JOIN users u ON t.assigned_to = u.id
+            WHERE t.assigned_to = $1
+            ORDER BY t.created_at DESC`,
             [req.user.id]
         );
         res.json(result.rows);

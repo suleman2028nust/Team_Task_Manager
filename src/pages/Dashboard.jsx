@@ -59,6 +59,8 @@ export default function Dashboard() {
     const [showManageModal, setShowManageModal] = useState(false);
     const [manageTeam, setManageTeam] = useState(null);
     const [manageMembers, setManageMembers] = useState([]);
+    const [selectedTeamView, setSelectedTeamView] = useState(null); // team clicked to view tasks
+    const [teamTasks, setTeamTasks] = useState([]);
     const navigate = useNavigate();
 
     const [showSidebar, setShowSidebar] = useState(window.innerWidth > 768);
@@ -237,6 +239,15 @@ export default function Dashboard() {
             setManageMembers(res.data);
             setShowManageModal(true);
         } catch (err) { console.error("Manage error", err); }
+    };
+
+    const viewTeamTasks = async (team) => {
+        setSelectedTeamView(team);
+        setTeamTasks([]); // clear immediately so stale data doesn't flash
+        try {
+            const res = await api.get(`/teams/${team.id}/tasks`);
+            setTeamTasks(res.data);
+        } catch (err) { console.error('Team tasks error', err); setTeamTasks([]); }
     };
 
     const openAddMemberModal = async (team) => {
@@ -439,7 +450,7 @@ export default function Dashboard() {
                                     Good to see you, {user?.username} 👋
                                 </h1>
                                 <p style={{color:'#475569',fontSize:13}}>
-                                    {tasks.length === 0 ? "No tasks yet — create your first one!" : `${tasks.filter(t=>t.status!=='completed').length} active task(s).`}
+                                    {tasks.length === 0 ? "No tasks assigned to you yet." : `${tasks.filter(t=>t.status!=='completed').length} active task(s) assigned to you.`}
                                 </p>
                                 
                                 {/* Reminders */}
@@ -520,7 +531,7 @@ export default function Dashboard() {
                         </>
                     )}
 
-                    {activeNav === 'teams' && (
+                    {activeNav === 'teams' && !selectedTeamView && (
                         <>
                             <div style={{marginBottom:24, display:'flex', alignItems:'center', justifyContent:'space-between'}}>
                                 <div>
@@ -557,7 +568,12 @@ export default function Dashboard() {
                                             </div>
                                             {t.description && <p style={{color:'#64748b',fontSize:12,lineHeight:1.5, marginBottom:16}}>{t.description}</p>}
                                             
-                                            <div style={{display:'flex', gap:8, marginTop:'auto'}}>
+                                            {/* View Tasks button for all members */}
+                                            <button onClick={() => viewTeamTasks(t)} style={{...S.btnGhost, width:'100%', padding:'7px', fontSize:11, marginBottom:8, color:'#e2e8f0'}}>
+                                                <CheckSquare size={12}/> View Team Tasks
+                                            </button>
+
+                                            <div style={{display:'flex', gap:8}}>
                                                 {isLeader ? (
                                                     <>
                                                         <button onClick={() => openAddMemberModal(t)} style={{...S.btnGhost, flex:1, padding:'6px', fontSize:11}}>
@@ -582,6 +598,59 @@ export default function Dashboard() {
                                     )})}
                                 </div>
                             )}
+                        </>
+                    )}
+
+                    {/* ── TEAM TASK VIEW ── */}
+                    {activeNav === 'teams' && selectedTeamView && (
+                        <>
+                            <div style={{marginBottom:24, display:'flex', alignItems:'center', gap:14}}>
+                                <button onClick={() => setSelectedTeamView(null)} style={{...S.btnGhost, padding:'7px 12px', fontSize:12}}>
+                                    ← Back to Teams
+                                </button>
+                                <div>
+                                    <h1 style={{color:'white',fontWeight:900,fontSize:22,letterSpacing:'-0.4px',marginBottom:2}}>
+                                        {selectedTeamView.name} — All Tasks
+                                    </h1>
+                                    <p style={{color:'#94a3b8',fontSize:13}}>{teamTasks.length} task(s) in this team</p>
+                                </div>
+                            </div>
+                            <div style={S.card}>
+                                {teamTasks.length === 0 ? (
+                                    <div style={{padding:'60px 20px',textAlign:'center'}}>
+                                        <CheckSquare size={28} color="#94a3b8" style={{margin:'0 auto 12px'}}/>
+                                        <p style={{color:'white',fontWeight:700,marginBottom:4}}>No tasks in this team yet</p>
+                                        <p style={{color:'#94a3b8',fontSize:13}}>Create a task and assign it to a member.</p>
+                                    </div>
+                                ) : teamTasks.map((task, i) => {
+                                    const s = STATUS[task.status] || STATUS.pending;
+                                    const isMyTask = task.assigned_to === user?.id;
+                                    return (
+                                        <div key={task.id}
+                                            onClick={() => openEditModal(task)}
+                                            style={{display:'flex',alignItems:'center',gap:14,padding:'13px 22px',borderBottom:i<teamTasks.length-1?'1px solid #1e1e2e':'none',borderLeft:`3px solid ${s.color}`,cursor:'pointer',transition:'background 0.1s'}}
+                                            onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.02)'}
+                                            onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                                            <button onClick={e=>{e.stopPropagation();cycleStatus(task);}} title="Click to change status"
+                                                style={{background:'none',border:'none',cursor:'pointer',padding:0,display:'flex',flexShrink:0,color:s.color}}>
+                                                <s.Icon size={17} color={s.color}/>
+                                            </button>
+                                            <div style={{flex:1,minWidth:0}}>
+                                                <p style={{color:'#e2e8f0',fontWeight:600,fontSize:13,marginBottom:2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{task.title}</p>
+                                                <div style={{display:'flex',alignItems:'center',gap:8,fontSize:11,color:'#475569'}}>
+                                                    <span style={{color: isMyTask ? '#818cf8' : '#475569', fontWeight: isMyTask ? 700 : 400}}>@{task.assignee_name}{isMyTask ? ' (you)' : ''}</span>
+                                                    {task.due_date && <><span>·</span><span>Due {new Date(task.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></>}
+                                                </div>
+                                            </div>
+                                            <div style={{display:'flex',alignItems:'center',gap:10,flexShrink:0}}>
+                                                {task.priority && <span style={{width:6,height:6,borderRadius:'50%',background:PRIORITY[task.priority]||'#6b7280'}} title={task.priority}/>}
+                                                <span style={{fontSize:11,fontWeight:700,padding:'4px 9px',borderRadius:7,background:`${s.color}18`,color:s.color}}>{s.label}</span>
+                                                <ChevronRight size={13} color="#334155"/>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </>
                     )}
                 </main>
