@@ -110,4 +110,24 @@ router.get('/me', (req, res) => {
     }
 });
 
+// GET /api/auth/users/search - find users by username or email
+router.get('/users/search', async (req, res) => {
+    const { q } = req.query;
+    if (!q || q.length < 2) return res.json([]);
+    try {
+        const result = await pool.query(
+            `SELECT id, username, email 
+             FROM users 
+             WHERE (username ILIKE $1 OR email ILIKE $1) 
+             AND id != $2
+             LIMIT 10`,
+            [`%${q}%`, req.user?.id || -1]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error('User search error:', err.message);
+        res.status(500).json({ message: 'Error searching users' });
+    }
+});
+
 module.exports = router;

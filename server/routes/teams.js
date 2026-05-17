@@ -17,6 +17,7 @@ router.get('/', isAuthenticated, async (req, res) => {
                 t.id,
                 t.name,
                 COALESCE(t.description, '') AS description,
+                t.created_by,
                 t.created_at
              FROM teams t
              JOIN team_members tm ON t.id = tm.team_id
@@ -39,7 +40,7 @@ router.post('/', isAuthenticated, async (req, res) => {
     const { name, description } = req.body;
     try {
         const teamResult = await pool.query(
-            'INSERT INTO teams (name, description, creator_id) VALUES ($1, $2, $3) RETURNING *',
+            'INSERT INTO teams (name, description, created_by) VALUES ($1, $2, $3) RETURNING *',
             [name, description || null, req.user.id]
         );
         const newTeam = teamResult.rows[0];
@@ -56,15 +57,20 @@ router.post('/', isAuthenticated, async (req, res) => {
     }
 });
 
-// POST /api/teams/:id/members - add a member to a team
+// POST /api/teams/:id/members - add a member to a team (only leader can add)
 router.post('/:id/members', isAuthenticated, async (req, res) => {
     const teamId = req.params.id;
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ message: 'userId is required' });
 
     try {
-        const team = await pool.query('SELECT id FROM teams WHERE id = $1', [teamId]);
+        const team = await pool.query('SELECT created_by FROM teams WHERE id = $1', [teamId]);
         if (team.rows.length === 0) return res.status(404).json({ message: 'Team not found' });
+        
+        // ONLY LEADER CAN ADD
+        if (team.rows[0].created_by !== req.user.id) {
+            return res.status(403).json({ message: 'Only the team leader can add members' });
+        }
 
         await pool.query(
             'INSERT INTO team_members (team_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
@@ -91,6 +97,51 @@ router.get('/:id/members', isAuthenticated, async (req, res) => {
     } catch (err) {
         console.error('GET /teams/:id/members error:', err.message);
         res.status(500).json({ message: 'Could not fetch members', error: err.message });
+    }
+});
+
+// DELETE /api/teams/:id/members/:userId - remove a member from a team (only creator can remove)
+router.delete('/:id/members/:userId', isAuthenticated, async (req, res) => {
+    const { id, userId } = req.params;
+    try {
+        // Check if requester is the creator
+        const team = await pool.query('SELECT created_by FROM teams WHERE id = $1', [id]);
+        if (team.rows.length === 0) return res.status(404).json({ message: 'Team not found' });
+        
+        if (team.rows[0].created_by !== req.user.id) {
+            return res.status(403).json({ message: 'Only the team leader can remove members' });
+        }
+
+        // Prevent leader from removing themselves (they should delete the team instead)
+        if (parseInt(userId) === req.user.id) {
+            return res.status(400).json({ message: 'You cannot remove yourself. Delete the team to dissolve it.' });
+        }
+
+        await pool.query('DELETE FROM team_members WHERE team_id = $1 AND user_id = $2', [id, userId]);
+        res.json({ message: 'Member removed from team' });
+    } catch (err) {
+        console.error('REMOVE member error:', err.message);
+        res.status(500).json({ message: 'Could not remove member' });
+    }
+});
+
+// DELETE /api/teams/:id - delete a team (only creator can delete)
+router.delete('/:id', isAuthenticated, async (req, res) => {
+    const teamId = req.params.id;
+    try {
+        // Check if user is the creator
+        const team = await pool.query('SELECT created_by FROM teams WHERE id = $1', [teamId]);
+        if (team.rows.length === 0) return res.status(404).json({ message: 'Team not found' });
+        
+        if (team.rows[0].created_by !== req.user.id) {
+            return res.status(403).json({ message: 'Only the team creator can delete this team' });
+        }
+
+        await pool.query('DELETE FROM teams WHERE id = $1', [teamId]);
+        res.json({ message: 'Team deleted successfully' });
+    } catch (err) {
+        console.error('DELETE /teams/:id error:', err.message);
+        res.status(500).json({ message: 'Could not delete team', error: err.message });
     }
 });
 
