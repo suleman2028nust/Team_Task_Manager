@@ -45,11 +45,6 @@ router.post('/', isAuthenticated, async (req, res) => {
         );
         const newTeam = teamResult.rows[0];
 
-        await pool.query(
-            'INSERT INTO team_members (team_id, user_id) VALUES ($1, $2)',
-            [newTeam.id, req.user.id]
-        );
-
         res.status(201).json({ message: 'Team created', team: newTeam });
     } catch (err) {
         console.error('POST /teams error:', err.message);

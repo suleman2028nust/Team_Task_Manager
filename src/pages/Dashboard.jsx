@@ -71,7 +71,12 @@ export default function Dashboard() {
                 if (!me.data.loggedIn) { navigate('/login'); return; }
                 setUser(me.data.user);
                 await refresh();
-            } finally { setLoading(false); }
+            } catch (err) {
+                console.error('Auth init error:', err);
+                navigate('/login'); // any network/server failure → redirect to login
+            } finally {
+                setLoading(false);
+            }
         })();
         
         return () => window.removeEventListener('resize', handleResize);

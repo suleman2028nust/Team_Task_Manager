@@ -1,23 +1,68 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import api from './api/axios';
 
+// ── ProtectedRoute ──────────────────────────────────────────────────────
+// Checks session before rendering the protected component.
+// Shows a full-page dark spinner while the auth check is in-flight,
+// then either renders the child page or redirects to /login.
+function ProtectedRoute({ children }) {
+    const [status, setStatus] = useState('checking'); // 'checking' | 'ok' | 'denied'
+
+    useEffect(() => {
+        api.get('/auth/me')
+            .then(res => setStatus(res.data.loggedIn ? 'ok' : 'denied'))
+            .catch(() => setStatus('denied'));
+    }, []);
+
+    if (status === 'checking') {
+        return (
+            <div style={{
+                position: 'fixed', inset: 0, display: 'flex',
+                alignItems: 'center', justifyContent: 'center',
+                background: '#020209', flexDirection: 'column', gap: 12
+            }}>
+                <div style={{
+                    width: 38, height: 38,
+                    border: '2px solid #4f46e5',
+                    borderTopColor: 'transparent',
+                    borderRadius: '50%',
+                    animation: 'spin 0.8s linear infinite'
+                }} />
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>Checking session…</p>
+            </div>
+        );
+    }
+
+    if (status === 'denied') return <Navigate to="/login" replace />;
+    return children;
+}
+
+// ── App ─────────────────────────────────────────────────────────────────
 function App() {
-  return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          {/* Default to login for now */}
-          <Route path="/" element={<Navigate to="/login" />} />
-        </Routes>
-      </div>
-    </Router>
-  );
+    return (
+        <Router>
+            <div className="App">
+                <Routes>
+                    <Route path="/login"    element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/dashboard" element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    } />
+                    {/* Root → login */}
+                    <Route path="/" element={<Navigate to="/login" replace />} />
+                    {/* Any unknown path → login */}
+                    <Route path="*" element={<Navigate to="/login" replace />} />
+                </Routes>
+            </div>
+        </Router>
+    );
 }
 
 export default App;
