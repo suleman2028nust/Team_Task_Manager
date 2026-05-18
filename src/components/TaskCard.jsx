@@ -1,44 +1,88 @@
 import React from 'react';
-import { Users, ChevronRight } from 'lucide-react';
+import { ChevronRight, CheckCircle2, Clock, Circle } from 'lucide-react';
 
-const TaskCard = ({ task }) => {
+const STATUS = {
+    completed:   { label: 'Completed',   color: '#10b981', Icon: CheckCircle2 },
+    in_progress: { label: 'In Progress', color: '#3b82f6', Icon: Clock },
+    pending:     { label: 'Pending',     color: '#f59e0b', Icon: Circle },
+};
+
+const PRIORITY = {
+    urgent: '#ef4444', 
+    high: '#f97316', 
+    medium: '#f59e0b', 
+    low: '#6b7280'
+};
+
+const TaskCard = ({
+    task,
+    currentUserId,
+    cycleStatus,
+    openEditModal,
+    showTeamName = true
+}) => {
+    const s = STATUS[task.status] || STATUS.pending;
+    const isMyTask = task.assigned_to === currentUserId;
+
     return (
-        <div className="group bg-slate-950 border border-slate-800 p-5 rounded-2xl hover:border-indigo-500/50 hover:bg-slate-900/50 transition duration-300 flex items-center justify-between shadow-sm">
-            <div className="flex items-center gap-6">
-                <div className={`h-10 w-1 dark:rounded-full ${
-                    task.priority === 'Urgent' ? 'bg-red-500' : 
-                    task.priority === 'High' ? 'bg-orange-500' : 
-                    task.priority === 'Medium' ? 'bg-blue-500' : 'bg-slate-700'
-                }`}></div>
-                <div>
-                    <h3 className="font-bold text-white group-hover:text-indigo-400 transition">{task.title}</h3>
-                    <div className="flex items-center gap-3 mt-1">
-                        <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
-                            <Users size={12} /> {task.team}
-                        </span>
-                        <span className="text-slate-700">•</span>
-                        <span className="text-[11px] text-slate-500 font-medium italic">Due: {task.due}</span>
-                    </div>
+        <div 
+            onClick={() => openEditModal(task)}
+            className="flex items-center gap-3.5 py-3 px-5.5 border-b last:border-b-0 border-[#1e1e2e] border-l-[3px] cursor-pointer hover:bg-white/[0.02] transition-all"
+            style={{ borderLeftColor: s.color }}
+        >
+            <button 
+                onClick={(e) => {
+                    e.stopPropagation(); 
+                    cycleStatus(task);
+                }} 
+                title="Click to change status"
+                className="bg-transparent border-0 cursor-pointer p-0 flex shrink-0" 
+                style={{ color: s.color }}
+            >
+                <s.Icon size={17} color={s.color}/>
+            </button>
+
+            <div className="flex-1 min-w-0">
+                <p className="text-slate-200 font-semibold text-xs mb-0.5 truncate">{task.title}</p>
+                <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                    {showTeamName && <span>{task.team_name || 'General'}</span>}
+                    {showTeamName && task.due_date && <span>·</span>}
+                    {task.due_date && (
+                        <span>Due {new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                    )}
+                    {task.assignee_name && task.assignee_name !== 'Unassigned' && (
+                        <>
+                            <span>·</span>
+                            <span style={{ 
+                                color: isMyTask ? '#818cf8' : '#cbd5e1', 
+                                fontWeight: isMyTask ? 700 : 500 
+                            }}>
+                                @{task.assignee_name}{isMyTask ? ' (you)' : ''}
+                            </span>
+                        </>
+                    )}
                 </div>
             </div>
-            
-            <div className="flex items-center gap-8">
-                <div className="text-right">
-                    <p className="text-[10px] text-slate-600 font-bold uppercase mb-1">Status</p>
-                    <span className={`text-[10px] font-bold px-2 py-1 rounded-md ${
-                        task.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400' : 
-                        task.status === 'In Progress' ? 'bg-blue-500/10 text-blue-400' : 
-                        'bg-slate-800 text-slate-400'
-                    }`}>
-                        {task.status.toUpperCase()}
-                    </span>
-                </div>
-                <button className="h-10 w-10 bg-slate-900 rounded-xl flex items-center justify-center text-slate-500 group-hover:bg-indigo-600 group-hover:text-white transition">
-                    <ChevronRight size={20} />
-                </button>
+
+            <div className="flex items-center gap-2.5 shrink-0">
+                {task.priority && (
+                    <span 
+                        className="w-1.5 h-1.5 rounded-full" 
+                        style={{ background: PRIORITY[task.priority] || '#6b7280' }} 
+                        title={`Priority: ${task.priority}`}
+                    />
+                )}
+                <span 
+                    className="text-[11px] font-bold px-2 py-0.5 rounded transition-all" 
+                    style={{ backgroundColor: `${s.color}18`, color: s.color }}
+                >
+                    {s.label}
+                </span>
+                <ChevronRight size={13} className="text-slate-700"/>
             </div>
         </div>
     );
 };
 
 export default TaskCard;
+export { STATUS, PRIORITY };

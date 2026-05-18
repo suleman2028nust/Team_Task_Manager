@@ -7,7 +7,7 @@ const passport = require('passport');
 const pool = require('./db');
 const path = require('path');
 
-// passport config has to be required after pool is ready
+// Passport configuration
 require('./config/passport')(passport);
 
 const authRoutes = require('./routes/auth');
@@ -18,20 +18,19 @@ const dashboardRoutes = require('./routes/dashboard');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// middleware
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// allow the react frontend to talk to us (for local dev)
+// CORS configuration
 app.use(cors({
     origin: 'http://localhost:5173',
     credentials: true
 }));
 
-// Serve static files from React build directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// session stored in postgres, fallback to memory in dev
+// Session configuration
 let sessionStore;
 if (process.env.NODE_ENV === 'production' || process.env.DATABASE_URL) {
     sessionStore = new pgSession({
@@ -51,23 +50,21 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        maxAge: 1000 * 60 * 60 * 2, // 2 hours of idle time
+        maxAge: 1000 * 60 * 60 * 2,
         httpOnly: true
     }
 }));
 
-// passport needs to come after session
 app.use(passport.initialize());
 app.use(passport.session());
 
-// routes
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
-// Protected SPA routes — redirect to /login server-side if no active session.
-// This fixes the blank white screen when a user opens /dashboard with an expired session.
+// Protected routes
 const protectedRoutes = ['/dashboard'];
 app.use((req, res, next) => {
     const isProtected = protectedRoutes.some(r => req.path === r || req.path.startsWith(r + '/'));
@@ -77,7 +74,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Fallback to React index.html for Single Page Application routing (React Router)
+// SPA routing fallback
 app.use((req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

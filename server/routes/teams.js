@@ -9,7 +9,7 @@ const teamSchema = Joi.object({
     description: Joi.string().max(300).optional().allow('')
 });
 
-// GET /api/teams - all teams the logged-in user belongs to
+// Get teams for logged-in user
 router.get('/', isAuthenticated, async (req, res) => {
     try {
         const result = await pool.query(
@@ -32,7 +32,7 @@ router.get('/', isAuthenticated, async (req, res) => {
     }
 });
 
-// POST /api/teams - create a new team
+// Create a new team
 router.post('/', isAuthenticated, async (req, res) => {
     const { error } = teamSchema.validate(req.body);
     if (error) return res.status(400).json({ message: error.details[0].message });
@@ -52,7 +52,7 @@ router.post('/', isAuthenticated, async (req, res) => {
     }
 });
 
-// POST /api/teams/:id/members - add a member to a team (only leader can add)
+// Add member to team
 router.post('/:id/members', isAuthenticated, async (req, res) => {
     const teamId = req.params.id;
     const { userId } = req.body;
@@ -62,7 +62,6 @@ router.post('/:id/members', isAuthenticated, async (req, res) => {
         const team = await pool.query('SELECT created_by FROM teams WHERE id = $1', [teamId]);
         if (team.rows.length === 0) return res.status(404).json({ message: 'Team not found' });
         
-        // ONLY LEADER CAN ADD
         if (team.rows[0].created_by !== req.user.id) {
             return res.status(403).json({ message: 'Only the team leader can add members' });
         }
@@ -78,7 +77,7 @@ router.post('/:id/members', isAuthenticated, async (req, res) => {
     }
 });
 
-// GET /api/teams/:id/members - get all members of a team
+// Get team members
 router.get('/:id/members', isAuthenticated, async (req, res) => {
     try {
         const result = await pool.query(
@@ -95,10 +94,9 @@ router.get('/:id/members', isAuthenticated, async (req, res) => {
     }
 });
 
-// GET /api/teams/:id/tasks - get all tasks for a specific team
+// Get team tasks
 router.get('/:id/tasks', isAuthenticated, async (req, res) => {
     try {
-        // Verify user is a member of this team
         const membership = await pool.query(
             'SELECT 1 FROM team_members WHERE team_id = $1 AND user_id = $2',
             [req.params.id, req.user.id]
@@ -134,11 +132,10 @@ router.get('/:id/tasks', isAuthenticated, async (req, res) => {
     }
 });
 
-// DELETE /api/teams/:id/members/:userId - remove a member from a team (only creator can remove)
+// Remove member from team
 router.delete('/:id/members/:userId', isAuthenticated, async (req, res) => {
     const { id, userId } = req.params;
     try {
-        // Check if requester is the creator
         const team = await pool.query('SELECT created_by FROM teams WHERE id = $1', [id]);
         if (team.rows.length === 0) return res.status(404).json({ message: 'Team not found' });
         
@@ -146,7 +143,6 @@ router.delete('/:id/members/:userId', isAuthenticated, async (req, res) => {
             return res.status(403).json({ message: 'Only the team leader can remove members' });
         }
 
-        // Prevent leader from removing themselves (they should delete the team instead)
         if (parseInt(userId) === req.user.id) {
             return res.status(400).json({ message: 'You cannot remove yourself. Delete the team to dissolve it.' });
         }
@@ -159,11 +155,10 @@ router.delete('/:id/members/:userId', isAuthenticated, async (req, res) => {
     }
 });
 
-// DELETE /api/teams/:id - delete a team (only creator can delete)
+// Delete team
 router.delete('/:id', isAuthenticated, async (req, res) => {
     const teamId = req.params.id;
     try {
-        // Check if user is the creator
         const team = await pool.query('SELECT created_by FROM teams WHERE id = $1', [teamId]);
         if (team.rows.length === 0) return res.status(404).json({ message: 'Team not found' });
         

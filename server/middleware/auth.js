@@ -1,5 +1,4 @@
-// simple middleware that checks if the user is logged in
-// attach this to any route that needs authentication
+// Route protection middleware
 const isAuthenticated = (req, res, next) => {
     if (req.isAuthenticated()) {
         return next();

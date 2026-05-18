@@ -2,10 +2,10 @@ const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
 const pool = require('../db');
 
-// this file tells passport how to verify a user during login
+// Passport configuration
 module.exports = (passport) => {
 
-    // LocalStrategy looks for username + password in the request body
+    // Local auth strategy
     passport.use(new LocalStrategy(async (username, password, done) => {
         try {
             const result = await pool.query(
@@ -31,12 +31,12 @@ module.exports = (passport) => {
         }
     }));
 
-    // save user id in session
+    // Serialize user session
     passport.serializeUser((user, done) => {
         done(null, user.id);
     });
 
-    // get full user object from the id stored in session
+    // Deserialize user session
     passport.deserializeUser(async (id, done) => {
         try {
             const result = await pool.query('SELECT id, username, email FROM users WHERE id = $1', [id]);

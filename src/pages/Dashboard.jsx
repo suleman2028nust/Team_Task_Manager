@@ -6,16 +6,8 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-
-const STATUS = {
-    completed:   { label: 'Completed',   color: '#10b981', Icon: CheckCircle2 },
-    in_progress: { label: 'In Progress', color: '#3b82f6', Icon: Clock },
-    pending:     { label: 'Pending',     color: '#f59e0b', Icon: Circle },
-};
-
-const PRIORITY = {
-    urgent: '#ef4444', high: '#f97316', medium: '#f59e0b', low: '#6b7280'
-};
+import Sidebar from '../components/Sidebar';
+import TaskCard, { STATUS, PRIORITY } from '../components/TaskCard';
 
 export default function Dashboard() {
     const [user,       setUser]       = useState(null);
@@ -57,7 +49,7 @@ export default function Dashboard() {
 
     const [showSidebar, setShowSidebar] = useState(window.innerWidth > 768);
 
-    /* ── load on mount ── */
+    // Load dashboard data on mount
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth > 768) setShowSidebar(true);
@@ -73,7 +65,7 @@ export default function Dashboard() {
                 await refresh();
             } catch (err) {
                 console.error('Auth init error:', err);
-                navigate('/login'); // any network/server failure → redirect to login
+                navigate('/login');
             } finally {
                 setLoading(false);
             }
@@ -101,7 +93,7 @@ export default function Dashboard() {
 
     const handleLogout = async () => { await api.post('/auth/logout'); navigate('/login'); };
 
-    /* ── create or update task ── */
+    // Create or update task
     const handleSubmit = async e => {
         e.preventDefault();
         const teamId = editingTask ? editingTask.team_id : parseInt(form.team_id);
@@ -183,7 +175,7 @@ export default function Dashboard() {
         }
     };
 
-    /* ── cycle task status ── */
+    // Cycle task status
     const cycleStatus = async (task) => {
         const order = ['pending','in_progress','completed'];
         const next  = order[(order.indexOf(task.status) + 1) % order.length];
@@ -299,7 +291,7 @@ export default function Dashboard() {
         });
     };
 
-    /* ── filtered tasks ── */
+    // Filtered tasks list
     const filtered = tasks.filter(t => {
         const matchesSearch = t.title.toLowerCase().includes(search.toLowerCase()) ||
                             (t.team_name||'').toLowerCase().includes(search.toLowerCase());
@@ -338,76 +330,20 @@ export default function Dashboard() {
         `}</style>
         <div className="fixed inset-0 flex bg-[#020209] font-sans text-[#cbd5e1] overflow-hidden">
 
-            {/* ── SIDEBAR ── */}
-            <aside className="sidebar-el w-64 min-w-[256px] bg-[#07070f] border-r border-[#1e1e2e] flex flex-col overflow-hidden transition-transform duration-300 md:relative md:translate-x-0" style={{
-                transform: showSidebar ? 'translateX(0)' : 'translateX(-100%)',
-                position: window.innerWidth <= 768 ? 'fixed' : 'relative',
-                zIndex: window.innerWidth <= 768 ? 100 : 'auto',
-                height: window.innerWidth <= 768 ? '100%' : 'auto'
-            }}>
-                {/* Logo */}
-                <div className="py-[22px] px-[18px] border-b border-[#1e1e2e] flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                        <div className="w-[35px] h-[35px] bg-[#4f46e5] rounded-[10px] flex items-center justify-center shadow-[0_0_18px_rgba(79,70,229,0.4)]">
-                            <LayoutDashboard size={17} color="white"/>
-                        </div>
-                        <span className="text-white font-extrabold text-base tracking-tight">TaskFlow</span>
-                    </div>
-                    {window.innerWidth <= 768 && (
-                        <button onClick={() => setShowSidebar(false)} className="background-none border-0 text-slate-500 cursor-pointer flex hover:text-slate-300 transition-colors">
-                            <X size={20}/>
-                        </button>
-                    )}
-                </div>
+            <Sidebar
+                user={user}
+                teams={teams}
+                stats={stats}
+                activeNav={activeNav}
+                setActiveNav={setActiveNav}
+                viewTeamTasks={viewTeamTasks}
+                handleLogout={handleLogout}
+                showSidebar={showSidebar}
+                setShowSidebar={setShowSidebar}
+                teamColors={teamColors}
+                selectedTeamView={selectedTeamView}
+            />
 
-                {/* Nav */}
-                <nav className="flex-1 py-3.5 px-2.5 overflow-y-auto">
-                    <p className="text-[10px] font-bold text-slate-500 tracking-widest uppercase px-2 mb-1.5">Workspace</p>
-                    {[
-                        { id:'tasks', label:'Tasks', Icon:CheckSquare, badge:stats.total },
-                        { id:'teams', label:'Teams', Icon:Users,       badge:stats.teams },
-                    ].map(({id,label,Icon,badge}) => {
-                        const active = activeNav === id;
-                        return (
-                            <button key={id} onClick={()=>setActiveNav(id)} className={`w-full flex items-center justify-between py-2 px-2.5 rounded-lg mb-0.5 transition-colors text-sm font-semibold border-0 cursor-pointer ${active ? 'bg-indigo-600/12 text-white' : 'bg-transparent text-slate-400 hover:text-slate-200'}`} style={{background: active ? 'rgba(99, 102, 241, 0.12)' : 'transparent'}}>
-                                <div className="flex items-center gap-2.5">
-                                    <Icon size={15} color={active?'#818cf8':'currentColor'}/>
-                                    {label}
-                                </div>
-                                <span className={`text-[10px] font-bold py-0.5 px-2 rounded-full ${active ? 'bg-indigo-600/20 text-[#a5b4fc]' : 'bg-[#1e1e2e] text-slate-400'}`}>{badge}</span>
-                            </button>
-                        );
-                    })}
-
-                    <p className="text-[10px] font-bold text-slate-500 tracking-widest uppercase px-2 mt-4.5 mb-1.5" style={{ marginTop: '18px' }}>My Teams</p>
-                    {teams.length === 0
-                        ? <p className="text-xs text-slate-600 px-2">No teams yet</p>
-                        : teams.map((t,i) => (
-                            <button key={t.id} onClick={()=>{setActiveNav('teams'); viewTeamTasks(t);}} className="w-full flex items-center gap-2.5 py-1.5 px-2.5 rounded-lg text-slate-500 hover:text-slate-300 font-semibold text-[12px] border-0 bg-transparent cursor-pointer">
-                                <span className="w-1.75 h-1.75 rounded-full flex-shrink-0" style={{ width: 7, height: 7, background: teamColors[i%teamColors.length] }}/>
-                                {t.name}
-                            </button>
-                        ))
-                    }
-                </nav>
-
-                {/* User */}
-                <div className="p-2.5 border-t border-[#1e1e2e]">
-                    <div className="flex items-center gap-2.5 py-2 px-2.5 rounded-[11px] bg-[#0f0f1a]">
-                        <div className="w-8 h-8 rounded-lg bg-[#4f46e5] flex items-center justify-center text-white font-extrabold text-sm shrink-0">
-                            {user?.username?.[0]?.toUpperCase()||'U'}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-white font-bold text-sm truncate">{user?.username}</p>
-                        </div>
-                        <button onClick={handleLogout} className="text-slate-600 bg-transparent border-0 cursor-pointer flex p-0.75 hover:text-red-400 transition-colors">
-                            <LogOut size={14}/>
-                        </button>
-                    </div>
-                </div>
-            </aside>
-
-            {/* ── MAIN ── */}
             <div className="flex-1 flex flex-col overflow-hidden min-w-0">
                 {/* Header */}
                 <header className="h-16 shrink-0 bg-[#07070f] border-b border-[#1e1e2e] flex items-center justify-between px-7 gap-3.5">
@@ -502,36 +438,16 @@ export default function Dashboard() {
                                         <p className="text-white font-bold mb-1">No tasks found</p>
                                         <p className="text-slate-400 text-[13px]">Click "New Task" to get started.</p>
                                     </div>
-                                ) : filtered.map((task, i) => {
-                                    const s = STATUS[task.status] || STATUS.pending;
-                                    return (
-                                        <div key={task.id} 
-                                            onClick={() => openEditModal(task)}
-                                            className="flex items-center gap-3.5 py-3 px-5.5 border-b last:border-b-0 border-[#1e1e2e] border-l-[3px] cursor-pointer hover:bg-white/[0.02] transition-all"
-                                            style={{ borderLeftColor: s.color }}>
-                                            {/* status icon — click to cycle */}
-                                            <button onClick={(e)=>{e.stopPropagation(); cycleStatus(task);}} title="Click to change status"
-                                                className="bg-transparent border-0 cursor-pointer p-0 flex shrink-0" style={{ color: s.color }}>
-                                                <s.Icon size={17} color={s.color}/>
-                                            </button>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-slate-200 font-semibold text-xs mb-0.5 truncate">{task.title}</p>
-                                                <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                                                    <span>{task.team_name||'General'}</span>
-                                                    {task.due_date && <><span>·</span><span>Due {new Date(task.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></>}
-                                                    {task.assignee_name && task.assignee_name !== 'Unassigned' && <><span>·</span><span>@{task.assignee_name}</span></>}
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-2.5 shrink-0">
-                                                {task.priority && (
-                                                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: PRIORITY[task.priority]||'#6b7280' }} title={task.priority}/>
-                                                )}
-                                                <span className="text-[11px] font-bold px-2 py-0.5 rounded transition-all" style={{ backgroundColor: `${s.color}18`, color: s.color }}>{s.label}</span>
-                                                <ChevronRight size={13} className="text-slate-700"/>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                ) : filtered.map((task) => (
+                                    <TaskCard
+                                        key={task.id}
+                                        task={task}
+                                        currentUserId={user?.id}
+                                        cycleStatus={cycleStatus}
+                                        openEditModal={openEditModal}
+                                        showTeamName={true}
+                                    />
+                                ))}
                             </div>
                         </>
                     )}
@@ -573,7 +489,6 @@ export default function Dashboard() {
                                             </div>
                                             {t.description && <p className="text-slate-400 text-xs leading-relaxed mb-4">{t.description}</p>}
                                             
-                                            {/* View Tasks button for all members */}
                                             <button onClick={() => viewTeamTasks(t)} className="flex items-center gap-1.5 h-9 w-full justify-center bg-[#0f0f1a] hover:bg-slate-900 border border-slate-700 rounded-lg text-[#e2e8f0] font-semibold text-[11px] mb-2 cursor-pointer transition-colors">
                                                 <CheckSquare size={12}/> View Team Tasks
                                             </button>
@@ -607,7 +522,6 @@ export default function Dashboard() {
                         </>
                     )}
 
-                    {/* ── TEAM TASK VIEW ── */}
                     {activeNav === 'teams' && selectedTeamView && (
                         <>
                             <div className="mb-6 flex items-center gap-3.5">
@@ -641,33 +555,16 @@ export default function Dashboard() {
                                         <p className="text-white font-bold mb-1">No tasks in this team yet</p>
                                         <p className="text-slate-400 text-[13px]">Create a task and assign it to a member.</p>
                                     </div>
-                                ) : teamTasks.map((task, i) => {
-                                    const s = STATUS[task.status] || STATUS.pending;
-                                    const isMyTask = task.assigned_to === user?.id;
-                                    return (
-                                        <div key={task.id}
-                                            onClick={() => openEditModal(task)}
-                                            className="flex items-center gap-3.5 py-3 px-5.5 border-b last:border-b-0 border-[#1e1e2e] border-l-[3px] cursor-pointer hover:bg-white/[0.02] transition-all"
-                                            style={{ borderLeftColor: s.color }}>
-                                            <button onClick={(e)=>{e.stopPropagation();cycleStatus(task);}} title="Click to change status"
-                                                className="bg-transparent border-0 cursor-pointer p-0 flex shrink-0" style={{ color: s.color }}>
-                                                <s.Icon size={17} color={s.color}/>
-                                            </button>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-slate-200 font-semibold text-xs mb-0.5 truncate">{task.title}</p>
-                                                <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                                                    <span style={{color: isMyTask ? '#818cf8' : '#cbd5e1', fontWeight: isMyTask ? 700 : 500}}>@{task.assignee_name}{isMyTask ? ' (you)' : ''}</span>
-                                                    {task.due_date && <><span>·</span><span>Due {new Date(task.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></>}
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-2.5 shrink-0">
-                                                {task.priority && <span className="w-1.5 h-1.5 rounded-full" style={{ background: PRIORITY[task.priority]||'#6b7280' }} title={task.priority}/>}
-                                                <span className="text-[11px] font-bold px-2 py-0.5 rounded transition-all" style={{ backgroundColor: `${s.color}18`, color: s.color }}>{s.label}</span>
-                                                <ChevronRight size={13} className="text-slate-700"/>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                ) : teamTasks.map((task) => (
+                                    <TaskCard
+                                        key={task.id}
+                                        task={task}
+                                        currentUserId={user?.id}
+                                        cycleStatus={cycleStatus}
+                                        openEditModal={openEditModal}
+                                        showTeamName={false}
+                                    />
+                                ))}
                             </div>
                         </>
                     )}
@@ -675,7 +572,7 @@ export default function Dashboard() {
             </div>
         </div>
 
-        {/* ── ADD MEMBER MODAL ── */}
+        {/* Add Member Modal */}
         {showMemberModal && (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-5" onClick={e=>e.target===e.currentTarget&&setShowMemberModal(false)}>
                 <div className="bg-[#0d0d18] border border-slate-700 rounded-2xl p-7 w-full max-w-[480px] max-h-[90vh] overflow-y-auto">
@@ -729,7 +626,7 @@ export default function Dashboard() {
             </div>
         )}
 
-        {/* ── MANAGE MEMBERS MODAL ── */}
+        {/* Manage Members Modal */}
         {showManageModal && (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-5" onClick={e=>e.target===e.currentTarget&&setShowManageModal(false)}>
                 <div className="bg-[#0d0d18] border border-slate-700 rounded-2xl p-7 w-full max-w-[480px] max-h-[90vh] overflow-y-auto">
@@ -768,7 +665,7 @@ export default function Dashboard() {
             </div>
         )}
 
-        {/* ── NEW TEAM MODAL ── */}
+        {/* New Team Modal */}
         {showTeamModal && (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-5" onClick={e=>e.target===e.currentTarget&&setShowTeamModal(false)}>
                 <div className="bg-[#0d0d18] border border-slate-700 rounded-2xl p-7 w-full max-w-[480px] max-h-[90vh] overflow-y-auto">
@@ -799,11 +696,10 @@ export default function Dashboard() {
             </div>
         )}
 
-        {/* ── NEW TASK MODAL ── */}
+        {/* New Task Modal */}
         {showModal && (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-5" onClick={e=>e.target===e.currentTarget&&setShowModal(false)}>
                 <div className="bg-[#0d0d18] border border-slate-700 rounded-2xl p-7 w-full max-w-[480px] max-h-[90vh] overflow-y-auto">
-                    {/* Modal header */}
                     <div className="flex items-center justify-between mb-5">
                         <h2 className="text-white font-extrabold text-[17px]">{editingTask ? 'Edit Task' : 'Create New Task'}</h2>
                         <div className="flex items-center gap-2.5">
@@ -921,7 +817,7 @@ export default function Dashboard() {
             </div>
         )}
 
-        {/* ── CUSTOM THEME-MATCHING CONFIRMATION MODAL ── */}
+        {/* Confirmation Modal */}
         {confirmAction && (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-5">
                 <div className="bg-[#0d0d18] border border-red-500/20 rounded-2xl p-7 w-full max-w-[400px] shadow-2xl shadow-red-500/5">
@@ -952,7 +848,7 @@ export default function Dashboard() {
             </div>
         )}
 
-        {/* ── PREMIUM TOAST NOTIFICATION SYSTEM ── */}
+        {/* Toast Notification */}
         {toast && (
             <div className={`fixed bottom-6 right-6 bg-[#0a0a14]/85 backdrop-blur-md border rounded-xl py-3 px-5 flex items-center gap-3 shadow-2xl z-[9999] transition-all animate-pulse ${toast.type === 'success' ? 'border-emerald-500/20' : 'border-red-500/20'}`}>
                 <div className="w-2 h-2 rounded-full shadow-[0_0_10px]" style={{

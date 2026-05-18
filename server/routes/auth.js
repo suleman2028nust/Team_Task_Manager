@@ -7,7 +7,7 @@ const pool = require('../db');
 const { isAuthenticated } = require('../middleware/auth');
 
 
-// validation schemas using Joi
+// Validation schemas
 const registerSchema = Joi.object({
     username: Joi.string().min(3).max(30).required(),
     email: Joi.string().email().required(),
@@ -21,7 +21,6 @@ const loginSchema = Joi.object({
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
-    // validate the request body first
     const { error } = registerSchema.validate(req.body);
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
@@ -30,7 +29,6 @@ router.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
 
     try {
-        // check if username or email is already taken
         const existing = await pool.query(
             'SELECT id FROM users WHERE email = $1 OR username = $2',
             [email, username]
@@ -49,7 +47,6 @@ router.post('/register', async (req, res) => {
 
         const newUser = result.rows[0];
 
-        // log them in automatically after registering
         req.login(newUser, (err) => {
             if (err) {
                 return res.status(500).json({ message: 'Registered but could not log in automatically' });
@@ -68,13 +65,12 @@ router.post('/register', async (req, res) => {
 
 // POST /api/auth/login
 router.post('/login', (req, res, next) => {
-    // validate inputs
     const { error } = loginSchema.validate(req.body);
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
     }
 
-    // passport handles the actual authentication
+    // Local auth handler
     passport.authenticate('local', (err, user, info) => {
         if (err) return next(err);
 
@@ -103,7 +99,7 @@ router.post('/logout', (req, res) => {
     });
 });
 
-// GET /api/auth/me - check who is currently logged in
+// Get current user session
 router.get('/me', (req, res) => {
     if (req.isAuthenticated()) {
         res.json({ loggedIn: true, user: req.user });
@@ -112,7 +108,7 @@ router.get('/me', (req, res) => {
     }
 });
 
-// GET /api/auth/users/search - find users by username or email
+// Find users by query
 router.get('/users/search', isAuthenticated, async (req, res) => {
     const { q } = req.query;
     if (!q || q.length < 2) return res.json([]);

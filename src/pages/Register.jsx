@@ -26,7 +26,7 @@ const Register = () => {
         }
     };
 
-    /* guaranteed input style — paddingLeft via inline so icon never overlaps */
+    // Shared input style
     const inputStyle = {
         width: '100%',
         height: '48px',

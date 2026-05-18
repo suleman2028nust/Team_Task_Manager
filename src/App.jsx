@@ -5,12 +5,9 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import api from './api/axios';
 
-// ── ProtectedRoute ──────────────────────────────────────────────────────
-// Checks session before rendering the protected component.
-// Shows a full-page dark spinner while the auth check is in-flight,
-// then either renders the child page or redirects to /login.
+// ProtectedRoute guards pages that require authentication
 function ProtectedRoute({ children }) {
-    const [status, setStatus] = useState('checking'); // 'checking' | 'ok' | 'denied'
+    const [status, setStatus] = useState('checking');
 
     useEffect(() => {
         api.get('/auth/me')
@@ -42,7 +39,6 @@ function ProtectedRoute({ children }) {
     return children;
 }
 
-// ── App ─────────────────────────────────────────────────────────────────
 function App() {
     return (
         <Router>

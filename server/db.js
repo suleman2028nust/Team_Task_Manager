@@ -3,8 +3,7 @@ const { Pool: PgPool } = require('pg');
 let pool;
 
 if (process.env.DATABASE_URL) {
-    // Use the Neon serverless driver for cloud connections
-    // (standard pg@8 is incompatible with Neon's channel_binding=require)
+    // Neon cloud driver
     const { Pool: NeonPool, neonConfig } = require('@neondatabase/serverless');
     const ws = require('ws');
     neonConfig.webSocketConstructor = ws;
@@ -23,17 +22,15 @@ if (process.env.DATABASE_URL) {
     });
 }
 
-// ensure we are always looking in the public schema
+// Set schema search path
 pool.on('connect', (client) => {
     client.query('SET search_path TO public');
 });
 
-// handle pool errors gracefully
 pool.on('error', (err) => {
     console.error('Unexpected pool error:', err.message);
 });
 
-// test the connection
 pool.connect((err, client, release) => {
     if (err) {
         console.error('Database connection failed:', err.message);

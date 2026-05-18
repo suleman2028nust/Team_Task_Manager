@@ -14,7 +14,7 @@ const taskSchema = Joi.object({
     due_date:    Joi.date().optional().allow(null)
 });
 
-// GET /api/tasks - only tasks assigned to the logged-in user (personal task list)
+// Get personal tasks
 router.get('/', isAuthenticated, async (req, res) => {
     try {
         const result = await pool.query(`
@@ -44,14 +44,13 @@ router.get('/', isAuthenticated, async (req, res) => {
     }
 });
 
-// POST /api/tasks - create a new task (Only team leader can create/assign)
+// Create new task
 router.post('/', isAuthenticated, async (req, res) => {
     const { error } = taskSchema.validate(req.body);
     if (error) return res.status(400).json({ message: error.details[0].message });
 
     const { title, description, team_id, assigned_to, status, priority, due_date } = req.body;
     try {
-        // Check if user is leader of the team
         const team = await pool.query('SELECT created_by FROM teams WHERE id = $1', [team_id]);
         if (team.rows.length === 0) return res.status(404).json({ message: 'Team not found' });
         if (team.rows[0].created_by !== req.user.id) {
@@ -71,7 +70,7 @@ router.post('/', isAuthenticated, async (req, res) => {
     }
 });
 
-// PUT /api/tasks/:id - update a task (Leader can edit all, Assignee can only update status)
+// Update task
 router.put('/:id', isAuthenticated, async (req, res) => {
     const updateSchema = Joi.object({
         title: Joi.string().min(2).max(200),
@@ -90,7 +89,6 @@ router.put('/:id', isAuthenticated, async (req, res) => {
     const taskId = req.params.id;
 
     try {
-        // Get task and team info
         const taskRes = await pool.query(
             `SELECT t.*, tm.created_by AS leader_id 
              FROM tasks t 
@@ -107,7 +105,6 @@ router.put('/:id', isAuthenticated, async (req, res) => {
             return res.status(403).json({ message: 'You do not have permission to update this task' });
         }
 
-        // If not leader (only assignee), restrict updates to 'status' only
         if (!isLeader) {
             const updates = Object.keys(req.body);
             if (updates.length > 1 || updates[0] !== 'status') {
@@ -133,7 +130,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
                 isLeader ? (team_id || null) : task.team_id,
                 isLeader ? (assigned_to === undefined ? 'KEEP_CURRENT' : 'CHANGE') : 'KEEP_CURRENT',
                 isLeader ? assigned_to : null,
-                status || null, // both can update status
+                status || null,
                 isLeader ? (priority || null) : task.priority,
                 isLeader ? (due_date === undefined ? 'KEEP_CURRENT' : 'CHANGE') : 'KEEP_CURRENT',
                 isLeader ? due_date : null,
@@ -147,7 +144,7 @@ router.put('/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-// DELETE /api/tasks/:id - delete a task (Only team leader can delete)
+// Delete task
 router.delete('/:id', isAuthenticated, async (req, res) => {
     try {
         const taskRes = await pool.query(

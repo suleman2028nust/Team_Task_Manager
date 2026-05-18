@@ -25,7 +25,7 @@ const Login = () => {
         }
     };
 
-    /* shared input style — guaranteed padding so icon never overlaps */
+    // Shared input style
     const inputStyle = {
         width: '100%',
         height: '48px',
