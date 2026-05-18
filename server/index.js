@@ -66,10 +66,22 @@ app.use('/api/teams', teamRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
+// Protected SPA routes — redirect to /login server-side if no active session.
+// This fixes the blank white screen when a user opens /dashboard with an expired session.
+const protectedRoutes = ['/dashboard'];
+app.use((req, res, next) => {
+    const isProtected = protectedRoutes.some(r => req.path === r || req.path.startsWith(r + '/'));
+    if (isProtected && !req.isAuthenticated()) {
+        return res.redirect('/login');
+    }
+    next();
+});
+
 // Fallback to React index.html for Single Page Application routing (React Router)
 app.use((req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
