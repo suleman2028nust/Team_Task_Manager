@@ -1,0 +1,13 @@
+node_modules
+server/node_modules
+server/.env
+server/public
+dist
+build
+.git
+.github
+.vscode
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
