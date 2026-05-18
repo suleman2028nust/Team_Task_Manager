@@ -51,9 +51,7 @@ function App() {
                             <Dashboard />
                         </ProtectedRoute>
                     } />
-                    {/* Root → login */}
                     <Route path="/" element={<Navigate to="/login" replace />} />
-                    {/* Any unknown path → login */}
                     <Route path="*" element={<Navigate to="/login" replace />} />
                 </Routes>
             </div>

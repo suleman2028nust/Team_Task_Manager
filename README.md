@@ -2,6 +2,8 @@
 
 A full-stack web application for managing teams and tasks efficiently. Built as part of a Full Stack Development Assessment.
 
+🌐 **Live Production Link**: [https://team-task-manager-363558864715.us-central1.run.app](https://team-task-manager-363558864715.us-central1.run.app)
+
 ## 🚀 Features
 - **Secure Authentication**: Register and login using PassportJS with persistent sessions in PostgreSQL.
 - **Team Management**: Create teams and add members.

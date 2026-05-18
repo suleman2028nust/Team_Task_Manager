@@ -342,8 +342,8 @@ export default function Dashboard() {
                 setShowSidebar={setShowSidebar}
                 teamColors={teamColors}
                 selectedTeamView={selectedTeamView}
-            />            <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-                {/* Header */}
+            />
+            <div className="flex-1 flex flex-col overflow-hidden min-w-0">
                 <header className="h-auto md:h-16 shrink-0 bg-[#07070f] border-b border-[#1e1e2e] flex flex-col md:flex-row items-stretch md:items-center justify-between p-4 md:px-7 gap-3.5">
                     <div className="flex items-center gap-3 w-full md:max-w-[380px]">
                         <button onClick={() => setShowSidebar(true)} className="md:hidden bg-transparent border-0 text-slate-500 cursor-pointer flex hover:text-slate-300 transition-colors">
@@ -378,11 +378,9 @@ export default function Dashboard() {
                     </div>
                 </header>
 
-                {/* Body */}
                 <main className="flex-1 overflow-y-auto p-7">
                     {activeNav === 'tasks' && (
                         <>
-                            {/* Greeting */}
                             <div className="mb-6">
                                 <h1 className="text-white font-black text-2xl tracking-tight mb-1">
                                     Good to see you, {user?.username} 👋
@@ -391,7 +389,6 @@ export default function Dashboard() {
                                     {tasks.length === 0 ? "No tasks assigned to you yet." : `${tasks.filter(t=>t.status!=='completed').length} active task(s) assigned to you.`}
                                 </p>
                                 
-                                {/* Reminders */}
                                 {tasks.some(t => t.status !== 'completed' && t.due_date && new Date(t.due_date) <= new Date(Date.now() + 24 * 60 * 60 * 1000)) && (
                                     <div className="mt-3.5 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2.5">
                                         <AlertCircle size={16} color="#ef4444"/>
@@ -402,7 +399,6 @@ export default function Dashboard() {
                                 )}
                             </div>
 
-                            {/* Stats */}
                             <div className="stats-grid grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-6">
                                 {[
                                     { label:'Total Tasks',  value:stats.total,       accent:'#6366f1', Icon:BarChart3     },
@@ -422,7 +418,6 @@ export default function Dashboard() {
                                 ))}
                             </div>
 
-                            {/* Task list */}
                             <div className="bg-[#07070f] border border-[#1e1e2e] rounded-[14px] overflow-hidden">
                                 <div className="flex items-center justify-between py-3.5 px-5.5 border-b border-[#1e1e2e]">
                                     <h2 className="text-white font-bold text-xs uppercase tracking-wider">All Tasks</h2>
@@ -568,7 +563,6 @@ export default function Dashboard() {
             </div>
         </div>
 
-        {/* Add Member Modal */}
         {showMemberModal && (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-5" onClick={e=>e.target===e.currentTarget&&setShowMemberModal(false)}>
                 <div className="bg-[#0d0d18] border border-slate-700 rounded-2xl p-7 w-full max-w-[480px] max-h-[90vh] overflow-y-auto">
@@ -622,7 +616,6 @@ export default function Dashboard() {
             </div>
         )}
 
-        {/* Manage Members Modal */}
         {showManageModal && (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-5" onClick={e=>e.target===e.currentTarget&&setShowManageModal(false)}>
                 <div className="bg-[#0d0d18] border border-slate-700 rounded-2xl p-7 w-full max-w-[480px] max-h-[90vh] overflow-y-auto">
@@ -661,7 +654,6 @@ export default function Dashboard() {
             </div>
         )}
 
-        {/* New Team Modal */}
         {showTeamModal && (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-5" onClick={e=>e.target===e.currentTarget&&setShowTeamModal(false)}>
                 <div className="bg-[#0d0d18] border border-slate-700 rounded-2xl p-7 w-full max-w-[480px] max-h-[90vh] overflow-y-auto">
@@ -692,7 +684,6 @@ export default function Dashboard() {
             </div>
         )}
 
-        {/* New Task Modal */}
         {showModal && (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-5" onClick={e=>e.target===e.currentTarget&&setShowModal(false)}>
                 <div className="bg-[#0d0d18] border border-slate-700 rounded-2xl p-7 w-full max-w-[480px] max-h-[90vh] overflow-y-auto">
@@ -813,7 +804,6 @@ export default function Dashboard() {
             </div>
         )}
 
-        {/* Confirmation Modal */}
         {confirmAction && (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-5">
                 <div className="bg-[#0d0d18] border border-red-500/20 rounded-2xl p-7 w-full max-w-[400px] shadow-2xl shadow-red-500/5">
@@ -844,7 +834,6 @@ export default function Dashboard() {
             </div>
         )}
 
-        {/* Toast Notification */}
         {toast && (
             <div className={`fixed bottom-6 right-6 bg-[#0a0a14]/85 backdrop-blur-md border rounded-xl py-3 px-5 flex items-center gap-3 shadow-2xl z-[9999] transition-all animate-pulse ${toast.type === 'success' ? 'border-emerald-500/20' : 'border-red-500/20'}`}>
                 <div className="w-2 h-2 rounded-full shadow-[0_0_10px]" style={{

@@ -24,7 +24,6 @@ const Sidebar = ({
                 height: window.innerWidth <= 768 ? '100%' : 'auto'
             }}
         >
-            {/* Logo */}
             <div className="py-[22px] px-[18px] border-b border-[#1e1e2e] flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                     <div className="w-[35px] h-[35px] bg-[#4f46e5] rounded-[10px] flex items-center justify-center shadow-[0_0_18px_rgba(79,70,229,0.4)]">
@@ -42,7 +41,6 @@ const Sidebar = ({
                 )}
             </div>
 
-            {/* Nav */}
             <nav className="flex-1 py-3.5 px-2.5 overflow-y-auto">
                 <p className="text-[10px] font-bold text-slate-500 tracking-widest uppercase px-2 mb-1.5">Workspace</p>
                 {[
@@ -100,7 +98,6 @@ const Sidebar = ({
                 )}
             </nav>
 
-            {/* User Profile Footer */}
             <div className="p-2.5 border-t border-[#1e1e2e]">
                 <div className="flex items-center gap-2.5 py-2 px-2.5 rounded-[11px] bg-[#0f0f1a]">
                     <div className="w-8 h-8 rounded-lg bg-[#4f46e5] flex items-center justify-center text-white font-extrabold text-sm shrink-0">

@@ -51,7 +51,6 @@ const Login = () => {
             fontFamily: 'Inter, system-ui, sans-serif',
             overflow: 'hidden',
         }}>
-            {/* Background glows */}
             <div style={{
                 position: 'absolute', width: '40vw', height: '40vw',
                 borderRadius: '50%', filter: 'blur(80px)', zIndex: 0,
@@ -65,7 +64,6 @@ const Login = () => {
                 background: 'radial-gradient(circle, rgba(99,102,241,0.10) 0%, transparent 70%)',
             }} />
 
-            {/* Card */}
             <div style={{
                 position: 'relative', zIndex: 1,
                 width: '100%', maxWidth: '420px',
@@ -76,7 +74,6 @@ const Login = () => {
                 boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
                 boxSizing: 'border-box',
             }}>
-                {/* Logo */}
                 <div style={{ textAlign: 'center', marginBottom: '32px' }}>
                     <div style={{
                         width: '56px', height: '56px',
@@ -96,7 +93,6 @@ const Login = () => {
                     </p>
                 </div>
 
-                {/* Error */}
                 {error && (
                     <div style={{
                         background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
@@ -109,7 +105,6 @@ const Login = () => {
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    {/* Username */}
                     <div style={{ marginBottom: '20px' }}>
                         <label style={{
                             display: 'block', fontSize: '11px', fontWeight: 700,
@@ -140,7 +135,6 @@ const Login = () => {
                         </div>
                     </div>
 
-                    {/* Password */}
                     <div style={{ marginBottom: '24px' }}>
                         <label style={{
                             display: 'block', fontSize: '11px', fontWeight: 700,
@@ -171,7 +165,6 @@ const Login = () => {
                         </div>
                     </div>
 
-                    {/* Submit */}
                     <button
                         type="submit"
                         disabled={loading}
@@ -195,7 +188,6 @@ const Login = () => {
                     </button>
                 </form>
 
-                {/* Footer */}
                 <div style={{ textAlign: 'center', marginTop: '28px' }}>
                     <p style={{ color: '#475569', fontSize: '14px', margin: 0 }}>
                         Don't have an account?{' '}

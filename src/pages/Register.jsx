@@ -52,7 +52,6 @@ const Register = () => {
             fontFamily: 'Inter, system-ui, sans-serif',
             overflow: 'hidden',
         }}>
-            {/* Background glows */}
             <div style={{
                 position: 'absolute', width: '40vw', height: '40vw',
                 borderRadius: '50%', filter: 'blur(80px)', zIndex: 0,
@@ -66,7 +65,6 @@ const Register = () => {
                 background: 'radial-gradient(circle, rgba(99,102,241,0.10) 0%, transparent 70%)',
             }} />
 
-            {/* Card */}
             <div style={{
                 position: 'relative', zIndex: 1,
                 width: '100%', maxWidth: '440px',
@@ -77,7 +75,6 @@ const Register = () => {
                 boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
                 boxSizing: 'border-box',
             }}>
-                {/* Logo */}
                 <div style={{ textAlign: 'center', marginBottom: '32px' }}>
                     <div style={{
                         width: '56px', height: '56px',
@@ -97,7 +94,6 @@ const Register = () => {
                     </p>
                 </div>
 
-                {/* Error */}
                 {error && (
                     <div style={{
                         background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
@@ -110,7 +106,6 @@ const Register = () => {
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    {/* Username */}
                     <div style={{ marginBottom: '16px' }}>
                         <label style={{
                             display: 'block', fontSize: '11px', fontWeight: 700,
@@ -141,7 +136,6 @@ const Register = () => {
                         </div>
                     </div>
 
-                    {/* Email */}
                     <div style={{ marginBottom: '16px' }}>
                         <label style={{
                             display: 'block', fontSize: '11px', fontWeight: 700,
@@ -172,7 +166,6 @@ const Register = () => {
                         </div>
                     </div>
 
-                    {/* Password */}
                     <div style={{ marginBottom: '16px' }}>
                         <label style={{
                             display: 'block', fontSize: '11px', fontWeight: 700,
@@ -203,7 +196,6 @@ const Register = () => {
                         </div>
                     </div>
 
-                    {/* Security badge */}
                     <div style={{
                         display: 'flex', alignItems: 'center', gap: '6px',
                         padding: '8px 12px',
@@ -217,7 +209,6 @@ const Register = () => {
                         </span>
                     </div>
 
-                    {/* Submit */}
                     <button
                         type="submit"
                         disabled={loading}
@@ -241,7 +232,6 @@ const Register = () => {
                     </button>
                 </form>
 
-                {/* Footer */}
                 <div style={{ textAlign: 'center', marginTop: '24px' }}>
                     <p style={{ color: '#475569', fontSize: '14px', margin: 0 }}>
                         Already have an account?{' '}
